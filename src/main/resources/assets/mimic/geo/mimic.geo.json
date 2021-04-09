@@ -1,0 +1,78 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.mimic",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "Body",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "base",
+					"parent": "Body",
+					"pivot": [8, 14, -8],
+					"cubes": [
+						{"origin": [-7, 0, -7], "size": [14, 10, 14], "inflate": -0.03, "uv": [0, 19]},
+						{"origin": [-6, 9, -6], "size": [12, 2, 13], "inflate": 0.1, "uv": [11, 43], "mirror": true}
+					]
+				},
+				{
+					"name": "tongue",
+					"parent": "Body",
+					"pivot": [0, 13, 6],
+					"rotation": [-2.4981, 0, 0],
+					"cubes": [
+						{"origin": [-2, 9.9019, -5.91283], "size": [4, 0, 12], "uv": [4, 43]}
+					]
+				},
+				{
+					"name": "lid",
+					"parent": "Body",
+					"pivot": [0, 10, 6],
+					"cubes": [
+						{"origin": [-7, 9, -7], "size": [14, 5, 14], "uv": [0, 0]},
+						{"origin": [-6, 8, -6], "size": [12, 2, 13], "uv": [11, 43]}
+					]
+				},
+				{
+					"name": "lidlock",
+					"parent": "lid",
+					"pivot": [0, -1, -1],
+					"cubes": [
+						{"origin": [-1, 7, -7], "size": [2, 4, 1], "uv": [6, 0]}
+					]
+				},
+				{
+					"name": "normalknob",
+					"parent": "lid",
+					"pivot": [0, -1, -1],
+					"cubes": [
+						{"origin": [-1, 7, -8], "size": [2, 4, 1], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "left_leg",
+					"pivot": [-3, 3, 0],
+					"cubes": [
+						{"origin": [-5, 0.1, -2], "size": [4, 4, 4], "uv": [0, 43]}
+					]
+				},
+				{
+					"name": "right_leg",
+					"pivot": [2, 3, 0],
+					"cubes": [
+						{"origin": [1, 0.1, -2], "size": [4, 4, 4], "uv": [0, 43]}
+					]
+				}
+			]
+		}
+	]
+}
