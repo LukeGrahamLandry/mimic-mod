@@ -25,19 +25,18 @@ public class MimicChaseGoal extends Goal {
     public void tick() {
         super.tick();
 
-        if (this.owner.hasTarget() && this.owner.getRandom().nextInt(2) == 0){
+        if (this.owner.hasTarget()){
             LivingEntity target = this.owner.getTarget();
-
 
             double dist = this.owner.distanceToSqr(target);
             if (dist > rangeSq){
                 // forget about you if you get out of range
-                // this.owner.setAngry(false);
-                // this.owner.setTarget(null);
+                this.owner.setAngry(false);
             } else if (dist < 1) {
                 // when it gets close just watch
                 this.owner.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
             } else {
+                this.owner.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
                 this.owner.getNavigation().moveTo(target, this.speed);
             }
         }

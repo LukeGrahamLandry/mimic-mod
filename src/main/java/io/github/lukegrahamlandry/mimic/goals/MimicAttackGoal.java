@@ -6,14 +6,14 @@ import net.minecraft.entity.ai.goal.Goal;
 
 public class MimicAttackGoal extends Goal {
     MimicEntity owner;
-    static double rangeSq = 3;
+    static double rangeSq = 4;
     public MimicAttackGoal(MimicEntity mimicEntity) {
         this.owner = mimicEntity;
     }
 
     @Override
     public boolean canUse() {
-        if (!(this.owner.isAngry() && this.owner.hasTarget() && this.owner.getRandom().nextInt(10) == 0)) return false;
+        if (!(this.owner.isAngry() && this.owner.hasTarget() && this.owner.getRandom().nextInt(3) == 0)) return false;
         return inRange();
     }
 
