@@ -1,6 +1,7 @@
 package io.github.lukegrahamlandry.mimic;
 
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
+import io.github.lukegrahamlandry.mimic.init.ContainerInit;
 import io.github.lukegrahamlandry.mimic.init.EntityInit;
 import io.github.lukegrahamlandry.mimic.init.ItemInit;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,6 +25,7 @@ public class MimicMain {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ItemInit.ITEMS.register(modEventBus);
         EntityInit.ENTITY_TYPES.register(modEventBus);
+        ContainerInit.CONTAINER_TYPES.register(modEventBus);
 
         modEventBus.addListener(MimicMain::mobAttributes);
     }
