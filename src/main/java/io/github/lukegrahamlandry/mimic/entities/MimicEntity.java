@@ -7,6 +7,7 @@ import io.github.lukegrahamlandry.mimic.goals.MimicAttackGoal;
 import io.github.lukegrahamlandry.mimic.goals.MimicChaseGoal;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -21,6 +22,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -65,7 +67,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
     }
 
     public static AttributeModifierMap.MutableAttribute createMobAttributes() {
-        return AttributeModifierMap.builder().add(Attributes.MAX_HEALTH, 60).add(Attributes.ATTACK_DAMAGE, 5).add(Attributes.KNOCKBACK_RESISTANCE).add(Attributes.MOVEMENT_SPEED, 0.55).add(Attributes.ARMOR, 5).add(Attributes.ARMOR_TOUGHNESS).add(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).add(net.minecraftforge.common.ForgeMod.NAMETAG_DISTANCE.get()).add(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get()).add(Attributes.FOLLOW_RANGE, 32.0D).add(Attributes.ATTACK_KNOCKBACK);
+        return AttributeModifierMap.builder().add(Attributes.MAX_HEALTH, 60).add(Attributes.ATTACK_DAMAGE, 5).add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.MOVEMENT_SPEED, 0.55).add(Attributes.ARMOR).add(Attributes.ARMOR_TOUGHNESS).add(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).add(net.minecraftforge.common.ForgeMod.NAMETAG_DISTANCE.get()).add(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get()).add(Attributes.FOLLOW_RANGE, 32.0D).add(Attributes.ATTACK_KNOCKBACK);
     }
 
     @Override
@@ -133,6 +135,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
         for (int i=0;i<this.heldItems.size();i++){
             if (this.heldItems.get(i).getItem() == Items.AIR){
                 this.heldItems.set(i, stack);
+                this.setPersistenceRequired();
                 return;
             }
         }
@@ -169,6 +172,37 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
             this.heldItems.set(i, stack);
             i++;
         }
+    }
+
+    public boolean hurt(DamageSource source, float amount) {
+        if (this.isInvulnerableTo(source)) {
+            return false;
+        }
+
+        if (source.getDirectEntity() != null && source.getDirectEntity() instanceof LivingEntity && ((LivingEntity)source.getDirectEntity()).getItemInHand(Hand.MAIN_HAND).getItem() instanceof AxeItem){
+            amount *= 2;
+        }
+        return super.hurt(source, amount);
+    }
+
+    @Override
+    public boolean isPushable() {
+        return false;
+    }
+
+    @Override
+    public boolean isPushedByFluid() {
+        return false;
+    }
+
+    @Override
+    public void push(Entity p_70108_1_) {
+        // super.push(p_70108_1_);
+    }
+
+    @Override
+    public void push(double p_70024_1_, double p_70024_3_, double p_70024_5_) {
+        // super.push(p_70024_1_, p_70024_3_, p_70024_5_);
     }
 
     public boolean isTamed() {

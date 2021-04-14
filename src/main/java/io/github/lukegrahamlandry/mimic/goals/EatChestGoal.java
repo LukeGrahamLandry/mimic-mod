@@ -46,8 +46,7 @@ public class EatChestGoal extends Goal {
                     chest.setItem(i, ItemStack.EMPTY);
                 }
                 this.owner.level.setBlock(this.owner.getChestPos(), Blocks.AIR.defaultBlockState(), 3);
-                ItemEntity item = new ItemEntity(this.owner.level, this.owner.getChestPos().getX(), this.owner.getChestPos().getY(), this.owner.getChestPos().getZ(), new ItemStack(Items.CHEST));
-                this.owner.level.addFreshEntity(item);
+                this.owner.addItem(new ItemStack(Items.CHEST));
 
                 this.target = null;
                 this.owner.getNavigation().moveTo(this.owner.getChestPos().getX(), this.owner.getChestPos().getY(), this.owner.getChestPos().getZ(), this.speed);

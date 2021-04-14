@@ -36,6 +36,9 @@ public class MimicAttackGoal extends Goal {
     public void tick() {
         if (this.owner.getAttackTick() == 4 && this.owner.hasTarget() && inRange()){
             this.owner.doHurtTarget(this.owner.getTarget());
+            if (!this.owner.hasTarget()){
+                this.owner.setAngry(false);
+            }
         }
     }
 }
