@@ -638,6 +638,32 @@
 					}
 				}
 			}
+		},
+		"animation.mimic.idle.chest": {
+			"loop": true,
+			"animation_length": 0.04,
+			"bones": {
+				"lidlock": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 1]
+						},
+						"0.04": {
+							"vector": [0, 0, 1]
+						}
+					}
+				},
+				"normalknob": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.04": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
 		}
 	}
 }

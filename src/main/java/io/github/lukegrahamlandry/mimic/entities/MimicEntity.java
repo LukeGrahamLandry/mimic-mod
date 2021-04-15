@@ -3,14 +3,13 @@ package io.github.lukegrahamlandry.mimic.entities;
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.client.MimicContainer;
 import io.github.lukegrahamlandry.mimic.goals.EatChestGoal;
+import io.github.lukegrahamlandry.mimic.goals.LockedPanicGoal;
 import io.github.lukegrahamlandry.mimic.goals.MimicAttackGoal;
 import io.github.lukegrahamlandry.mimic.goals.MimicChaseGoal;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
+import io.github.lukegrahamlandry.mimic.init.ItemInit;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
@@ -48,12 +47,13 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MimicEntity extends MobEntity implements IAnimatable, INamedContainerProvider, IInventory {
+public class MimicEntity extends CreatureEntity implements IAnimatable, INamedContainerProvider, IInventory {
 
     private AnimationFactory factory = new AnimationFactory(this);
 
     private static final DataParameter<Boolean> IS_TAMED = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> IS_STEALTH = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> IS_LOCKED = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> IS_ANGRY = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ATTACK_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
     private static final DataParameter<BlockPos> CHEST_POS = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BLOCK_POS);
@@ -69,7 +69,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
     }
 
     public static AttributeModifierMap.MutableAttribute createMobAttributes() {
-        return AttributeModifierMap.builder().add(Attributes.MAX_HEALTH, 60).add(Attributes.ATTACK_DAMAGE, 5).add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.MOVEMENT_SPEED, 0.55).add(Attributes.ARMOR).add(Attributes.ARMOR_TOUGHNESS).add(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).add(net.minecraftforge.common.ForgeMod.NAMETAG_DISTANCE.get()).add(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get()).add(Attributes.FOLLOW_RANGE, 32.0D).add(Attributes.ATTACK_KNOCKBACK);
+        return AttributeModifierMap.builder().add(Attributes.MAX_HEALTH, 60).add(Attributes.ATTACK_DAMAGE, 10).add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.MOVEMENT_SPEED, 0.55).add(Attributes.ARMOR).add(Attributes.ARMOR_TOUGHNESS).add(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).add(net.minecraftforge.common.ForgeMod.NAMETAG_DISTANCE.get()).add(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get()).add(Attributes.FOLLOW_RANGE, 32.0D).add(Attributes.ATTACK_KNOCKBACK);
     }
 
     @Override
@@ -79,6 +79,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
         this.goalSelector.addGoal(2, new MimicAttackGoal(this));
 
         this.goalSelector.addGoal(3, new EatChestGoal(this, 0.5, 3));
+        this.goalSelector.addGoal(2, new LockedPanicGoal(this, 0.6));
     }
 
     @Override
@@ -91,7 +92,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
 
             if (this.playerLookTicks > 0){
                 this.playerLookTicks--;
-                if (this.playerLookTicks == 0){
+                if (this.playerLookTicks == 0 && !isLocked()){
                     this.playerLooking.closeContainer();
                     this.setAngry(true);
                 }
@@ -110,14 +111,23 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
             return PlayState.CONTINUE;
         }
 
-        if (this.getEntityData().get(IS_STEALTH)){  // dont replace condition with isStealth(), it will break, im being to clever
+        if (isLocked()){  // dont replace condition with isStealth(), it will break, im being too clever
+            if (this.getEntityData().get(UP_DOWN_TICK) > 0){
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.lock", false));
+                return PlayState.CONTINUE;
+            }
+
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.lockidle", true));
+            return PlayState.CONTINUE;
+        }
+
+        if (this.getEntityData().get(IS_STEALTH)){  // dont replace condition with isStealth(), it will break, im being too clever
             if (this.getEntityData().get(UP_DOWN_TICK) > 0){
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.sit", false));
                 return PlayState.CONTINUE;
             }
 
-            // this seems to be the right animation for sitting down w/ no legs but need a version without the gold lock
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.lockidle", true));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.idle.chest", true));
             return PlayState.CONTINUE;
 
         } else if (this.getEntityData().get(UP_DOWN_TICK) > 0){
@@ -134,6 +144,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
         this.getEntityData().define(ATTACK_TICK, 0);
         this.getEntityData().define(UP_DOWN_TICK, 0);
         this.getEntityData().define(IS_TAMED, false);
+        this.getEntityData().define(IS_LOCKED, false);
         this.getEntityData().define(IS_ANGRY, false);
         this.getEntityData().define(IS_STEALTH, false);
         this.getEntityData().define(CHEST_POS, BlockPos.ZERO);
@@ -141,6 +152,14 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
 
     @Override
     protected ActionResultType mobInteract(PlayerEntity player, Hand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!level.isClientSide() && stack.getItem() == ItemInit.MIMIC_LOCK.get()){
+            this.setLocked(true);
+            if (!player.isCreative()) stack.shrink(1);
+            return ActionResultType.CONSUME;
+        }
+
+
         player.openMenu(this);
         return ActionResultType.SUCCESS;
     }
@@ -250,6 +269,10 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
         return flag;
     }
 
+    public boolean isLocked() {
+        return this.getEntityData().get(IS_LOCKED);
+    }
+
     public boolean hasTarget() {
         return this.getTarget() != null && this.getTarget().isAlive();
     }
@@ -264,7 +287,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
 
     public void setAngry(boolean flag) {
         if (flag){
-            if (isTamed()) return;
+            if (isTamed() || isLocked()) return;
             setStealth(false);
         }
         this.getEntityData().set(IS_ANGRY, flag);
@@ -278,6 +301,14 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
             this.getEntityData().set(UP_DOWN_TICK, 22);
         }
         this.getEntityData().set(IS_STEALTH, flag);
+    }
+
+    public void setLocked(boolean flag) {
+        MimicMain.LOGGER.debug("lock: " + flag);
+        if (!isLocked() && flag){
+            this.getEntityData().set(UP_DOWN_TICK, 28);
+        }
+        this.getEntityData().set(IS_LOCKED, flag);
     }
 
     public void setChestPos(BlockPos pos) {
