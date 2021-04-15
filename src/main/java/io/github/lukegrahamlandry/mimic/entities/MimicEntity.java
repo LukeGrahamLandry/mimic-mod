@@ -2,19 +2,18 @@ package io.github.lukegrahamlandry.mimic.entities;
 
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.client.MimicContainer;
-import io.github.lukegrahamlandry.mimic.goals.EatChestGoal;
-import io.github.lukegrahamlandry.mimic.goals.LockedPanicGoal;
-import io.github.lukegrahamlandry.mimic.goals.MimicAttackGoal;
-import io.github.lukegrahamlandry.mimic.goals.MimicChaseGoal;
+import io.github.lukegrahamlandry.mimic.goals.*;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
 import io.github.lukegrahamlandry.mimic.init.ItemInit;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
@@ -35,6 +34,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -46,6 +46,8 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class MimicEntity extends CreatureEntity implements IAnimatable, INamedContainerProvider, IInventory {
 
@@ -58,6 +60,8 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     private static final DataParameter<Integer> ATTACK_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
     private static final DataParameter<BlockPos> CHEST_POS = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BLOCK_POS);
     private static final DataParameter<Integer> UP_DOWN_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
+    private static final DataParameter<Optional<UUID>> DATA_OWNERUUID_ID = EntityDataManager.defineId(TameableEntity.class, DataSerializers.OPTIONAL_UUID);
+    private UUID owner;
 
     int playerLookTicks = 0;
     PlayerEntity playerLooking;
@@ -80,6 +84,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
         this.goalSelector.addGoal(3, new EatChestGoal(this, 0.5, 3));
         this.goalSelector.addGoal(2, new LockedPanicGoal(this, 0.6));
+        this.goalSelector.addGoal(6, new TamedFollowGoal(this, 0.5D, 8.0F, 2.0F, false));
     }
 
     @Override
@@ -92,7 +97,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
             if (this.playerLookTicks > 0){
                 this.playerLookTicks--;
-                if (this.playerLookTicks == 0 && !isLocked()){
+                if (this.playerLookTicks == 0 && !isLocked() && !isTamed()){
                     this.playerLooking.closeContainer();
                     this.setAngry(true);
                 }
@@ -111,7 +116,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return PlayState.CONTINUE;
         }
 
-        if (isLocked()){  // dont replace condition with isStealth(), it will break, im being too clever
+        if (isLocked()){
             if (this.getEntityData().get(UP_DOWN_TICK) > 0){
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.lock", false));
                 return PlayState.CONTINUE;
@@ -159,6 +164,22 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return ActionResultType.CONSUME;
         }
 
+        if (!level.isClientSide() && stack.getItem() == ItemInit.MIMIC_KEY.get() && !this.isTamed()){
+            this.setTamed(true);
+            if (!player.isCreative()) stack.shrink(1);
+            this.owner = player.getUUID();
+
+            // do particles
+            for(int i = 0; i < 7; ++i) {
+                double d0 = this.random.nextGaussian() * 0.02D;
+                double d1 = this.random.nextGaussian() * 0.02D;
+                double d2 = this.random.nextGaussian() * 0.02D;
+                ((ServerWorld)this.level).sendParticles(ParticleTypes.HEART, this.getRandomX(1.0D), this.getRandomY() + 0.5D, this.getRandomZ(1.0D), 1, d0, d1, d2, 0);
+            }
+
+            return ActionResultType.CONSUME;
+        }
+
 
         player.openMenu(this);
         return ActionResultType.SUCCESS;
@@ -201,6 +222,10 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         }
 
         compoundNBT.put("mimichelditems", nbt);
+
+        if (this.isTamed()){
+            compoundNBT.putString("owner", this.owner.toString());
+        }
     }
 
     @Override
@@ -215,6 +240,11 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             this.heldItems.set(i, stack);
             i++;
         }
+
+        if (this.isTamed()){
+            this.owner = UUID.fromString(compoundNBT.getString("owner"));
+        }
+
     }
 
     public boolean hurt(DamageSource source, float amount) {
@@ -227,6 +257,11 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         }
         this.setAngry(true);
         return super.hurt(source, amount);
+    }
+
+    public LivingEntity getOwner(){
+        if (!this.isTamed() || this.level.isClientSide()) return null;
+        return (LivingEntity) ((ServerWorld)this.level).getEntity(this.owner);
     }
 
     @Override
@@ -250,6 +285,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public boolean isTamed() {
+        if (this.owner == null) return false;
         return this.getEntityData().get(IS_TAMED);
     }
 
@@ -309,6 +345,14 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             this.getEntityData().set(UP_DOWN_TICK, 28);
         }
         this.getEntityData().set(IS_LOCKED, flag);
+    }
+
+    public void setTamed(boolean flag) {
+        if (flag){
+            setAngry(false);
+            setStealth(false);
+        }
+        this.getEntityData().set(IS_TAMED, flag);
     }
 
     public void setChestPos(BlockPos pos) {
