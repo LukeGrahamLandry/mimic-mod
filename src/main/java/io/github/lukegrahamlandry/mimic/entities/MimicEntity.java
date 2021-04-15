@@ -53,9 +53,11 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
     private AnimationFactory factory = new AnimationFactory(this);
 
     private static final DataParameter<Boolean> IS_TAMED = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> IS_STEALTH = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> IS_ANGRY = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ATTACK_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
     private static final DataParameter<BlockPos> CHEST_POS = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BLOCK_POS);
+    private static final DataParameter<Integer> UP_DOWN_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
 
     int playerLookTicks = 0;
     PlayerEntity playerLooking;
@@ -85,6 +87,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
 
         if (!this.level.isClientSide()){
             if (this.getAttackTick() > 0) this.getEntityData().set(ATTACK_TICK, this.getAttackTick() - 1);
+            if (this.getEntityData().get(UP_DOWN_TICK) > 0) this.getEntityData().set(UP_DOWN_TICK, this.getEntityData().get(UP_DOWN_TICK) - 1);
 
             if (this.playerLookTicks > 0){
                 this.playerLookTicks--;
@@ -96,10 +99,29 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
         }
     }
 
+    public void setFacingDirection(int x){
+        this.setRot(x * 90, 180);
+    }
+
     // decides which animation to play. animationName is from the json file in resources/id/animations
     private <E extends IAnimatable> PlayState predicate(AnimationEvent<E> event){
         if (this.getAttackTick() > 0){
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.attack", false));
+            return PlayState.CONTINUE;
+        }
+
+        if (this.getEntityData().get(IS_STEALTH)){  // dont replace condition with isStealth(), it will break, im being to clever
+            if (this.getEntityData().get(UP_DOWN_TICK) > 0){
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.sit", false));
+                return PlayState.CONTINUE;
+            }
+
+            // this seems to be the right animation for sitting down w/ no legs but need a version without the gold lock
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.lockidle", true));
+            return PlayState.CONTINUE;
+
+        } else if (this.getEntityData().get(UP_DOWN_TICK) > 0){
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.getup", false));
             return PlayState.CONTINUE;
         }
 
@@ -110,8 +132,10 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.getEntityData().define(ATTACK_TICK, 0);
+        this.getEntityData().define(UP_DOWN_TICK, 0);
         this.getEntityData().define(IS_TAMED, false);
         this.getEntityData().define(IS_ANGRY, false);
+        this.getEntityData().define(IS_STEALTH, false);
         this.getEntityData().define(CHEST_POS, BlockPos.ZERO);
     }
 
@@ -182,6 +206,7 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
         if (source.getDirectEntity() != null && source.getDirectEntity() instanceof LivingEntity && ((LivingEntity)source.getDirectEntity()).getItemInHand(Hand.MAIN_HAND).getItem() instanceof AxeItem){
             amount *= 2;
         }
+        this.setAngry(true);
         return super.hurt(source, amount);
     }
 
@@ -210,7 +235,19 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
     }
 
     public boolean isAngry() {
-        return this.getEntityData().get(IS_ANGRY);
+        boolean flag = this.getEntityData().get(IS_ANGRY);
+        if (flag && isStealth()) return false; // it is playing the stand animation and will be ready to be angry soon
+        return flag;
+    }
+
+    public boolean isStealth() {
+        boolean flag = this.getEntityData().get(IS_STEALTH);
+
+        if (!flag && this.getEntityData().get(UP_DOWN_TICK) > 0){ // currently standing up
+            return true;
+        }
+
+        return flag;
     }
 
     public boolean hasTarget() {
@@ -226,7 +263,21 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
     }
 
     public void setAngry(boolean flag) {
+        if (flag){
+            if (isTamed()) return;
+            setStealth(false);
+        }
         this.getEntityData().set(IS_ANGRY, flag);
+    }
+
+    public void setStealth(boolean flag) {
+        MimicMain.LOGGER.debug("stealth: " + flag);
+        if (!isStealth() && flag){
+            this.getEntityData().set(UP_DOWN_TICK, 20);
+        } else if (isStealth() && !flag){
+            this.getEntityData().set(UP_DOWN_TICK, 22);
+        }
+        this.getEntityData().set(IS_STEALTH, flag);
     }
 
     public void setChestPos(BlockPos pos) {
@@ -245,10 +296,6 @@ public class MimicEntity extends MobEntity implements IAnimatable, INamedContain
     @Override
     public AnimationFactory getFactory(){
         return this.factory;
-    }
-
-    public void startStealth() {
-        MimicMain.LOGGER.debug("stealth");
     }
 
     @Nullable
