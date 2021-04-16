@@ -60,11 +60,14 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     private static final DataParameter<Integer> ATTACK_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
     private static final DataParameter<BlockPos> CHEST_POS = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BLOCK_POS);
     private static final DataParameter<Integer> UP_DOWN_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
-    private static final DataParameter<Optional<UUID>> DATA_OWNERUUID_ID = EntityDataManager.defineId(TameableEntity.class, DataSerializers.OPTIONAL_UUID);
+    private static final DataParameter<Boolean> IS_OPEN = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> OPEN_CLOSE_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
+
     private UUID owner;
 
     int playerLookTicks = 0;
     PlayerEntity playerLooking;
+    int scaredTicks = 0;
 
     private NonNullList<ItemStack> heldItems = NonNullList.withSize(27, ItemStack.EMPTY);
 
@@ -73,13 +76,13 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public static AttributeModifierMap.MutableAttribute createMobAttributes() {
-        return AttributeModifierMap.builder().add(Attributes.MAX_HEALTH, 60).add(Attributes.ATTACK_DAMAGE, 10).add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.MOVEMENT_SPEED, 0.55).add(Attributes.ARMOR).add(Attributes.ARMOR_TOUGHNESS).add(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).add(net.minecraftforge.common.ForgeMod.NAMETAG_DISTANCE.get()).add(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get()).add(Attributes.FOLLOW_RANGE, 32.0D).add(Attributes.ATTACK_KNOCKBACK);
+        return AttributeModifierMap.builder().add(Attributes.MAX_HEALTH, 60).add(Attributes.ATTACK_DAMAGE, 14).add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.MOVEMENT_SPEED, 0.55).add(Attributes.ARMOR).add(Attributes.ARMOR_TOUGHNESS).add(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).add(net.minecraftforge.common.ForgeMod.NAMETAG_DISTANCE.get()).add(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get()).add(Attributes.FOLLOW_RANGE, 32.0D).add(Attributes.ATTACK_KNOCKBACK);
     }
 
     @Override
     protected void registerGoals() {
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
-        this.goalSelector.addGoal(2, new MimicChaseGoal(this, 0.5, 10));
+        this.goalSelector.addGoal(2, new MimicChaseGoal(this, 0.6, 10));
         this.goalSelector.addGoal(2, new MimicAttackGoal(this));
 
         this.goalSelector.addGoal(3, new EatChestGoal(this, 0.5, 3));
@@ -94,6 +97,8 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         if (!this.level.isClientSide()){
             if (this.getAttackTick() > 0) this.getEntityData().set(ATTACK_TICK, this.getAttackTick() - 1);
             if (this.getEntityData().get(UP_DOWN_TICK) > 0) this.getEntityData().set(UP_DOWN_TICK, this.getEntityData().get(UP_DOWN_TICK) - 1);
+            if (this.getEntityData().get(OPEN_CLOSE_TICK) > 0) this.getEntityData().set(OPEN_CLOSE_TICK, this.getEntityData().get(OPEN_CLOSE_TICK) - 1);
+            if (scaredTicks > 0) scaredTicks--;
 
             if (this.playerLookTicks > 0){
                 this.playerLookTicks--;
@@ -115,6 +120,34 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.attack", false));
             return PlayState.CONTINUE;
         }
+
+        if (isOpen()){
+            if (this.getEntityData().get(OPEN_CLOSE_TICK) > 0){
+                if (isTamed()){
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tamed.mimic.chest.open", false));
+                } else {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.chest.open", false));
+                }
+                return PlayState.CONTINUE;
+            }
+
+            if (isTamed()){
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tamed.mimic.chest.open.idle", false));
+            } else {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.chest.open.idle", false));
+            }
+            return PlayState.CONTINUE;
+
+        } else if (this.getEntityData().get(OPEN_CLOSE_TICK) > 0){
+            if (isTamed()){
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tamed.mimic.chest.close", false));
+            } else {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.chest.close", false));
+            }
+
+            return PlayState.CONTINUE;
+        }
+
 
         if (isLocked()){
             if (this.getEntityData().get(UP_DOWN_TICK) > 0){
@@ -152,11 +185,22 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         this.getEntityData().define(IS_LOCKED, false);
         this.getEntityData().define(IS_ANGRY, false);
         this.getEntityData().define(IS_STEALTH, false);
+        this.getEntityData().define(IS_OPEN, false);
+        this.getEntityData().define(OPEN_CLOSE_TICK, 0);
         this.getEntityData().define(CHEST_POS, BlockPos.ZERO);
     }
 
     @Override
     protected ActionResultType mobInteract(PlayerEntity player, Hand hand) {
+        if (isTamed() && player.isShiftKeyDown() && !this.level.isClientSide()){
+            this.setStealth(!this.isStealth());
+            // snap to block
+            BlockPos pos = this.blockPosition();
+            this.setPos(pos.getX()+0.5d, pos.getY()+0.5d, pos.getZ()+0.5d);
+            return ActionResultType.SUCCESS;
+        }
+
+
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide() && stack.getItem() == ItemInit.MIMIC_LOCK.get()){
             this.setLocked(true);
@@ -164,22 +208,21 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return ActionResultType.CONSUME;
         }
 
-        if (!level.isClientSide() && stack.getItem() == ItemInit.MIMIC_KEY.get() && !this.isTamed()){
-            this.setTamed(true);
-            if (!player.isCreative()) stack.shrink(1);
-            this.owner = player.getUUID();
-
-            // do particles
-            for(int i = 0; i < 7; ++i) {
-                double d0 = this.random.nextGaussian() * 0.02D;
-                double d1 = this.random.nextGaussian() * 0.02D;
-                double d2 = this.random.nextGaussian() * 0.02D;
-                ((ServerWorld)this.level).sendParticles(ParticleTypes.HEART, this.getRandomX(1.0D), this.getRandomY() + 0.5D, this.getRandomZ(1.0D), 1, d0, d1, d2, 0);
+        if (stack.getItem() == ItemInit.MIMIC_KEY.get() && !this.isTamed()){
+            if (!level.isClientSide()){
+                this.setTamed(true);
+                if (!player.isCreative()) stack.shrink(1);
+                this.owner = player.getUUID();
+            } else {
+                for(int i = 0; i < 7; ++i) {
+                    double d0 = this.random.nextGaussian() * 0.02D;
+                    double d1 = this.random.nextGaussian() * 0.02D;
+                    double d2 = this.random.nextGaussian() * 0.02D;
+                    this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0D), this.getRandomY() + 0.5D, this.getRandomZ(1.0D), d0, d1, d2);
+                }
             }
-
             return ActionResultType.CONSUME;
         }
-
 
         player.openMenu(this);
         return ActionResultType.SUCCESS;
@@ -223,6 +266,11 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
         compoundNBT.put("mimichelditems", nbt);
 
+        compoundNBT.putBoolean("tame", isTamed());
+        compoundNBT.putBoolean("lock", isLocked());
+        compoundNBT.putBoolean("angry", isAngry());
+        compoundNBT.putBoolean("stealth", isStealth());
+
         if (this.isTamed()){
             compoundNBT.putString("owner", this.owner.toString());
         }
@@ -240,6 +288,11 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             this.heldItems.set(i, stack);
             i++;
         }
+
+        setTamed(compoundNBT.getBoolean("tame"));
+        setLocked(compoundNBT.getBoolean("lock"));
+        setStealth(compoundNBT.getBoolean("stealth"));
+        setAngry(compoundNBT.getBoolean("angry"));
 
         if (this.isTamed()){
             this.owner = UUID.fromString(compoundNBT.getString("owner"));
@@ -282,6 +335,14 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     @Override
     public void push(double p_70024_1_, double p_70024_3_, double p_70024_5_) {
         // super.push(p_70024_1_, p_70024_3_, p_70024_5_);
+    }
+
+    public boolean isScared(){
+        return scaredTicks > 0;
+    }
+
+    public boolean isOpen() {
+        return this.getEntityData().get(IS_OPEN);
     }
 
     public boolean isTamed() {
@@ -344,6 +405,9 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         if (!isLocked() && flag){
             this.getEntityData().set(UP_DOWN_TICK, 28);
         }
+        if (flag){
+            setAngry(false);
+        }
         this.getEntityData().set(IS_LOCKED, flag);
     }
 
@@ -380,12 +444,24 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return new MimicContainer(ContainerInit.TAME_MIMIC.get(), id, playerInventory, this, 3);
         } else {
             this.playerLooking = player;
-            this.playerLookTicks = 50;
+            this.playerLookTicks = 30;
             return new MimicContainer(ContainerInit.EVIL_MIMIC.get(), id, playerInventory, this, 3);
         }
     }
 
     // IInventory
+
+    @Override
+    public void stopOpen(PlayerEntity p_174886_1_) {
+        this.getEntityData().set(OPEN_CLOSE_TICK, 10);
+        this.getEntityData().set(IS_OPEN, false);
+    }
+
+    @Override
+    public void startOpen(PlayerEntity p_174889_1_) {
+        this.getEntityData().set(OPEN_CLOSE_TICK, 13);
+        this.getEntityData().set(IS_OPEN, true);
+    }
 
     @Override
     public int getContainerSize() {
@@ -409,6 +485,10 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             this.setChanged();
 
             this.playerLookTicks = 2;
+            if (this.isLocked() && getRandom().nextInt(3) == 0){
+                this.playerLooking.closeContainer();
+                this.scaredTicks = 200;
+            }
         }
 
         return itemstack;

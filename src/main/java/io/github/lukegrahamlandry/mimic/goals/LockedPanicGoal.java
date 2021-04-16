@@ -36,7 +36,7 @@ public class LockedPanicGoal extends Goal {
     public boolean canUse() {
         if (!this.mob.isLocked()) return false;
 
-        if (this.mob.getLastHurtByMob() == null && !this.mob.isOnFire()) {
+        if (!this.mob.isScared() && this.mob.getLastHurtByMob() == null && !this.mob.isOnFire()) {
             return false;
         } else {
             if (this.mob.isOnFire()) {

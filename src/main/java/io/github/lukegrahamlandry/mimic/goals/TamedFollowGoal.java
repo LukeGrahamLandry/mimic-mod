@@ -44,8 +44,8 @@ public class TamedFollowGoal extends Goal {
             return false;
         } else if (livingentity.isSpectator()) {
             return false;
-        //} else if (this.tamable.isOrderedToSit()) {
-          //  return false;
+        } else if (this.tamable.isStealth()) {
+            return false;
         } else if (this.tamable.distanceToSqr(livingentity) < (double)(this.startDistance * this.startDistance)) {
             return false;
         } else {
@@ -57,8 +57,8 @@ public class TamedFollowGoal extends Goal {
     public boolean canContinueToUse() {
         if (this.navigation.isDone()) {
             return false;
-        //} else if (this.tamable.isOrderedToSit()) {
-            //return false;
+        } else if (this.tamable.isStealth()) {
+            return false;
         } else {
             return !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
         }
