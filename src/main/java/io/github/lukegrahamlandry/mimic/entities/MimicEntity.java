@@ -62,7 +62,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     private static final DataParameter<Boolean> IS_LOCKED = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> IS_ANGRY = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ATTACK_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
-    private static final DataParameter<BlockPos> CHEST_POS = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BLOCK_POS);
     private static final DataParameter<Integer> UP_DOWN_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
     private static final DataParameter<Boolean> IS_OPEN = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> OPEN_CLOSE_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
@@ -89,7 +88,9 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         this.goalSelector.addGoal(2, new MimicChaseGoal(this, 0.6, 10));
         this.goalSelector.addGoal(2, new MimicAttackGoal(this));
 
-        this.goalSelector.addGoal(3, new EatChestGoal(this, 0.5, 3));
+        this.goalSelector.addGoal(3, new EatChestGoal(this));
+        this.goalSelector.addGoal(3, new FindChestGoal(this, 0.5));
+
         this.goalSelector.addGoal(2, new LockedPanicGoal(this, 0.6));
         this.goalSelector.addGoal(6, new TamedFollowGoal(this, 0.5D, 8.0F, 2.0F, false));
     }
@@ -192,7 +193,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         this.getEntityData().define(IS_STEALTH, false);
         this.getEntityData().define(IS_OPEN, false);
         this.getEntityData().define(OPEN_CLOSE_TICK, 0);
-        this.getEntityData().define(CHEST_POS, BlockPos.ZERO);
     }
 
     @Override
@@ -320,11 +320,14 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         if (this.isInvulnerableTo(source)) {
             return false;
         }
-
         if (source.getDirectEntity() != null && source.getDirectEntity() instanceof LivingEntity && ((LivingEntity)source.getDirectEntity()).getItemInHand(Hand.MAIN_HAND).getItem() instanceof AxeItem){
             amount *= 2;
+
+            if (source.getDirectEntity() instanceof PlayerEntity && !((PlayerEntity)source.getDirectEntity()).isCreative()){
+                this.setAngry(true);
+            }
         }
-        this.setAngry(true);
+
         return super.hurt(source, amount);
     }
 
@@ -434,13 +437,13 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         this.getEntityData().set(IS_TAMED, flag);
     }
 
-    public void setChestPos(BlockPos pos) {
+    /* public void setChestPos(BlockPos pos) {
         this.getEntityData().set(CHEST_POS, pos);
     }
 
     public BlockPos getChestPos() {
         return this.getEntityData().get(CHEST_POS);
-    }
+    } */
 
     @Override
     public void registerControllers(AnimationData data){
