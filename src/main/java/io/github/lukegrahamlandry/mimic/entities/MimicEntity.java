@@ -5,6 +5,7 @@ import io.github.lukegrahamlandry.mimic.client.MimicContainer;
 import io.github.lukegrahamlandry.mimic.goals.*;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
 import io.github.lukegrahamlandry.mimic.init.ItemInit;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
@@ -16,6 +17,7 @@ import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
@@ -23,16 +25,18 @@ import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameterSets;
+import net.minecraft.loot.LootParameters;
+import net.minecraft.loot.LootTable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -131,6 +135,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
                 return PlayState.CONTINUE;
             }
 
+            // doesnt work
             if (isTamed()){
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tamed.mimic.chest.open.idle", false));
             } else {
@@ -224,6 +229,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return ActionResultType.CONSUME;
         }
 
+        if (this.isEmpty()) this.generateDefaultLoot();
         player.openMenu(this);
         return ActionResultType.SUCCESS;
     }
@@ -231,6 +237,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     @Override
     protected void dropCustomDeathLoot(DamageSource p_213333_1_, int p_213333_2_, boolean p_213333_3_) {
         super.dropCustomDeathLoot(p_213333_1_, p_213333_2_, p_213333_3_);
+        if (this.isEmpty()) this.generateDefaultLoot();
         for (int i=0;i<this.heldItems.size();i++){
             if (this.heldItems.get(i).getItem() != Items.AIR){
                 this.spawnAtLocation(this.heldItems.get(i));
@@ -251,6 +258,14 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
         ItemEntity item = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), stack);
         this.level.addFreshEntity(item);
+    }
+
+    private void generateDefaultLoot() {
+        if (this.level.isClientSide()) return;
+        ResourceLocation lootLocation = new ResourceLocation(MimicMain.MOD_ID, "default_mimic_loot");
+        LootTable loottable = this.level.getServer().getLootTables().get(lootLocation);
+        LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level)).withParameter(LootParameters.ORIGIN, this.position());
+        loottable.fill(this, lootcontext$builder.create(LootParameterSets.CHEST));
     }
 
     @Override
@@ -296,6 +311,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
         if (this.isTamed()){
             this.owner = UUID.fromString(compoundNBT.getString("owner"));
+            MimicMain.LOGGER.debug("loaded owner: " + this.owner);
         }
 
     }
@@ -346,7 +362,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public boolean isTamed() {
-        if (this.owner == null) return false;
         return this.getEntityData().get(IS_TAMED);
     }
 
