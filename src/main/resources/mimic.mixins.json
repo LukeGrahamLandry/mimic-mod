@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "package": "io.github.lukegrahamlandry.mimic.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mimic.refmap.json",
+  "mixins": [
+    "MixinStructurePiece"
+  ],
+  "minVersion": "0.8"
+}
