@@ -7,6 +7,7 @@ import io.github.lukegrahamlandry.mimic.init.ContainerInit;
 import io.github.lukegrahamlandry.mimic.init.EntityInit;
 import io.github.lukegrahamlandry.mimic.init.ItemInit;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ChestBlock;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -65,6 +66,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     boolean hasAlreadyGeneratedLoot = false;
 
     private NonNullList<ItemStack> heldItems = NonNullList.withSize(27, ItemStack.EMPTY);
+    private int facingDirection = -1;
 
     public MimicEntity(EntityType<? extends MimicEntity> type, World world) {
         super(type, world);
@@ -77,14 +79,16 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     @Override
     protected void registerGoals() {
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
-        this.goalSelector.addGoal(2, new MimicChaseGoal(this, 0.6, 10));
+        this.goalSelector.addGoal(2, new MimicChaseGoal(this, 0.6D, 10));
         this.goalSelector.addGoal(2, new MimicAttackGoal(this));
 
         this.goalSelector.addGoal(3, new EatChestGoal(this));
-        this.goalSelector.addGoal(3, new FindChestGoal(this, 0.5));
+        this.goalSelector.addGoal(3, new FindChestGoal(this, 0.5D));
 
         this.goalSelector.addGoal(2, new LockedPanicGoal(this, 0.6));
         this.goalSelector.addGoal(6, new TamedFollowGoal(this, 0.5D, 8.0F, 2.0F, false));
+
+        this.goalSelector.addGoal(7, new MimicWanderGoal(this, 0.5D));
     }
 
     @Override
@@ -104,11 +108,23 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
                     this.setAngry(true);
                 }
             }
+
+            if (!this.isAngry() && !this.isStealth() && !this.isTamed() && getRandom().nextInt(6000) == 0){
+                this.setPos(this.blockPosition().getX()+0.5d, this.blockPosition().getY(), this.blockPosition().getZ()+0.5d);
+                this.setFacingDirection(0);
+                this.setStealth(true);
+                MimicMain.LOGGER.debug("mimic got board of searching and sat down");
+            }
+
+            if (this.isStealth() && this.facingDirection != -1 && getRandom().nextInt(10) == 0){
+                this.setRot(this.facingDirection * 90, 180);
+            }
         }
     }
 
     public void setFacingDirection(int x){
-        this.setRot(x * 90, 180);
+        this.facingDirection = x;
+        this.setRot(this.facingDirection * 90, 180);
     }
 
     // decides which animation to play. animationName is from the json file in resources/id/animations
@@ -238,6 +254,8 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public void addItem(ItemStack stack) {
+        this.hasAlreadyGeneratedLoot = true;
+
         for (int i=0;i<this.heldItems.size();i++){
             if (this.heldItems.get(i).getItem() == Items.AIR){
                 this.heldItems.set(i, stack);

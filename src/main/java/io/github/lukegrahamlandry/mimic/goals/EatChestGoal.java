@@ -10,6 +10,7 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -34,6 +35,8 @@ public class EatChestGoal extends Goal {
         return this.owner.getAttackTick() > 0;
     }
 
+
+    // TODO doesnt get rotation when it starts on top of chest instead of using find goal
     @Override
     public void start() {
         this.pos = (new BlockPos(this.owner.getBoundingBox().getCenter())).below();
@@ -42,11 +45,13 @@ public class EatChestGoal extends Goal {
         this.owner.setFacingDirection(direction);
         this.owner.startAttackAnim();
 
-        MimicMain.LOGGER.debug("start eat chest");
+        MimicMain.LOGGER.debug("start eat chest " + direction);
     }
 
     @Override
     public void tick() {
+        this.owner.getNavigation().moveTo((Path) null, 0);
+
         // take items from the chest and break it
         if (this.owner.getAttackTick() == 3 && this.owner.level.getBlockState(pos).getBlock() == Blocks.CHEST){
             ChestTileEntity chest = (ChestTileEntity) this.owner.level.getBlockEntity(pos);
