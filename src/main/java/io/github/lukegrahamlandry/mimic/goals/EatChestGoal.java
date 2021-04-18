@@ -41,19 +41,19 @@ public class EatChestGoal extends Goal {
     public void start() {
         this.pos = (new BlockPos(this.owner.getBoundingBox().getCenter())).below();
         BlockState state = this.owner.level.getBlockState(pos);
-        int direction = state.getValue(ChestBlock.FACING).get2DDataValue();
-        this.owner.setFacingDirection(direction);
+        this.owner.snapToBlock(pos.above(), state.getValue(ChestBlock.FACING));
         this.owner.startAttackAnim();
 
-        MimicMain.LOGGER.debug("start eat chest " + direction);
+        MimicMain.LOGGER.debug("start eat chest");
     }
 
     @Override
     public void tick() {
-        this.owner.getNavigation().moveTo((Path) null, 0);
+        // this.owner.getNavigation().moveTo((Path) null, 0);
 
+        BlockState state = this.owner.level.getBlockState(pos);
         // take items from the chest and break it
-        if (this.owner.getAttackTick() == 3 && this.owner.level.getBlockState(pos).getBlock() == Blocks.CHEST){
+        if (this.owner.getAttackTick() == 3 && state.is(Blocks.CHEST)){
             ChestTileEntity chest = (ChestTileEntity) this.owner.level.getBlockEntity(pos);
 
             // take items
@@ -63,10 +63,8 @@ public class EatChestGoal extends Goal {
             }
             this.owner.addItem(new ItemStack(Items.CHEST));
 
-            int direction = this.owner.level.getBlockState(pos).getValue(ChestBlock.FACING).get2DDataValue();
             this.owner.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-            this.owner.setPos(pos.getX()+0.5d, pos.getY(), pos.getZ()+0.5d);
-            this.owner.setFacingDirection(direction);
+            this.owner.snapToBlock(pos, state.getValue(ChestBlock.FACING));
             this.owner.setStealth(true);
         }
     }

@@ -4,10 +4,8 @@ import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.client.MimicContainer;
 import io.github.lukegrahamlandry.mimic.goals.*;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
-import io.github.lukegrahamlandry.mimic.init.EntityInit;
 import io.github.lukegrahamlandry.mimic.init.ItemInit;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -31,7 +29,9 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
@@ -45,6 +45,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -59,6 +60,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     private static final DataParameter<Integer> UP_DOWN_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
     private static final DataParameter<Boolean> IS_OPEN = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> OPEN_CLOSE_TICK = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
+    private static final DataParameter<Integer> FACING_DIRECTION = EntityDataManager.defineId(MimicEntity.class, DataSerializers.INT);
 
     private UUID owner;
 
@@ -69,6 +71,8 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
     private NonNullList<ItemStack> heldItems = NonNullList.withSize(27, ItemStack.EMPTY);
     private int facingDirection = -1;
+
+    private static final int boredOfWanderingChance = 2 * 60 * 20;
 
     public MimicEntity(EntityType<? extends MimicEntity> type, World world) {
         super(type, world);
@@ -111,22 +115,31 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
                 }
             }
 
-            if (!this.isAngry() && !this.isStealth() && !this.isTamed() && getRandom().nextInt(6000) == 0){
-                this.setPos(this.blockPosition().getX()+0.5d, this.blockPosition().getY(), this.blockPosition().getZ()+0.5d);
-                this.setFacingDirection(0);
+            if (!this.isAngry() && !this.isStealth() && !this.isTamed() && getRandom().nextInt(boredOfWanderingChance) == 0){
+                this.snapToBlock(this.blockPosition(), null);
                 this.setStealth(true);
                 MimicMain.LOGGER.debug("mimic got board of searching and sat down");
             }
 
-            if (this.isStealth() && this.facingDirection != -1 && getRandom().nextInt(10) == 0){
-                this.setRot(this.facingDirection * 90, 180);
+            // stealth if a player is near
+            if (!this.isAngry() && !this.isStealth() && !this.isTamed() && getRandom().nextInt(5) == 0){
+                AxisAlignedBB box = this.getBoundingBox().inflate(10);  // range in blocks
+                for(PlayerEntity playerentity : level.players()) {
+                    if (!playerentity.isCreative() && box.contains(playerentity.getX(), playerentity.getY(), playerentity.getZ())) {
+                        this.snapToBlock(this.blockPosition(), null);
+                        this.setStealth(true);
+                    }
+                }
             }
         }
     }
 
-    public void setFacingDirection(int x){
-        this.facingDirection = x;
-        this.setRot(this.facingDirection * 90, 180);
+    public void snapToBlock(BlockPos pos, @Nullable Direction dir){
+        if (dir == null) dir = Direction.from2DDataValue(getRandom().nextInt(4));
+        MimicMain.LOGGER.debug("snaped facing " + dir.getName());
+        this.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, dir.get2DDataValue() * 90, 0);
+        this.setYBodyRot(dir.get2DDataValue() * 90);
+        this.getNavigation().moveTo((Path) null, 0);
     }
 
     // decides which animation to play. animationName is from the json file in resources/id/animations
@@ -203,10 +216,24 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         this.getEntityData().define(IS_STEALTH, false);
         this.getEntityData().define(IS_OPEN, false);
         this.getEntityData().define(OPEN_CLOSE_TICK, 0);
+        this.getEntityData().define(FACING_DIRECTION, -1);
     }
 
     @Override
     protected ActionResultType mobInteract(PlayerEntity player, Hand hand) {
+         // facing test
+        /*
+        if (!this.level.isClientSide()){
+            this.facingDirection =( this.facingDirection + 1) % 4;
+            // this.moveTo(this.getX(), this.getY(), this.getZ(), this.facingDirection*90, 0);
+            // this.setYHeadRot(this.facingDirection *90);
+            // setFacingDirection(this.facingDirection + 1);
+        }
+        */
+
+
+
+
         if (isTamed() && player.isShiftKeyDown() && !this.level.isClientSide()){
             this.setStealth(!this.isStealth());
             // snap to block
@@ -241,7 +268,10 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
         if (this.isEmpty()) this.generateDefaultLoot();
         player.openMenu(this);
+
         return ActionResultType.SUCCESS;
+
+
     }
 
     @Override
@@ -549,7 +579,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public static <T extends MobEntity> boolean checkSpawn(EntityType<T> type, IServerWorld world, SpawnReason reason, BlockPos pos, Random rand) {
-        if (world.getBlockState(pos).is(Blocks.CAVE_AIR) && world.getBlockState(pos.below()).is(Blocks.STONE)) {
+        if (world.getBlockState(pos).is(Blocks.CAVE_AIR)) {  // && world.getBlockState(pos.below()).is(Blocks.STONE)
             MimicMain.LOGGER.debug("spawn mimic at " + pos);
             return true;
         }

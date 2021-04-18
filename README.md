@@ -11,7 +11,7 @@ A stealthy new mob commissioned by Redrix
     - if it can't find a chest to eat it generates random loot 
     - will attack you when you try to open it
     - takes extra damage from axes
-    - spawn in: igloo, end city, woodland mansion, desert temple, jungle temple, nether fortress, stronghold
+    - spawn in: igloo, end city, woodland mansion, desert temple, jungle temple, nether fortress, stronghold, dungeon, very small chance in caves
 - lock it with a mimic lock
     - it will not attack you 
     - has a chance to run away each time you steal an item

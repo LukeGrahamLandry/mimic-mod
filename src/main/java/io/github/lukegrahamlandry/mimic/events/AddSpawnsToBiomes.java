@@ -16,7 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 public class AddSpawnsToBiomes {
     @SubscribeEvent
     public static void loadBiome(BiomeLoadingEvent event) {
-        event.getSpawns().addSpawn(EntityClassification.MONSTER, new MobSpawnInfo.Spawners(EntityInit.MIMIC.get(), 1, 1, 1));
+        event.getSpawns().addSpawn(EntityClassification.MONSTER, new MobSpawnInfo.Spawners(EntityInit.MIMIC.get(), 200, 1, 1));
     }
 
     @SubscribeEvent

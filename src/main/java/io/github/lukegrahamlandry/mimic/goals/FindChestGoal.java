@@ -37,13 +37,11 @@ public class FindChestGoal extends MoveToBlockGoal {
 
         BlockState state = this.mimic.level.getBlockState(this.target);
         if (state.getBlock() == Blocks.CHEST){
-            int direction = state.getValue(ChestBlock.FACING).get2DDataValue();
-            this.mimic.setFacingDirection(direction);
-            this.mimic.setPos(target.getX()+0.5d, target.getY()+1, target.getZ()+0.5d);
+            this.mimic.snapToBlock(target.above(), state.getValue(ChestBlock.FACING));
         }
 
         this.mimic.getNavigation().moveTo((Path) null, 0);
-        this.mimic.setDeltaMovement(0,0,0);
+        // this.mimic.setDeltaMovement(0,0,0);
     }
 
     protected boolean isValidTarget(IWorldReader p_179488_1_, BlockPos p_179488_2_) {
