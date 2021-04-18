@@ -10,6 +10,9 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.util.Random;
 
+// this block exists because when i try to spawn a mob in handleDataMarker (mixin) it just hangs forever
+// so instead i place a block and schedule a tick to turn it into a mob
+
 public class SingleMimicSpawner extends Block {
     public SingleMimicSpawner(Block.Properties properties) {
         super(properties);

@@ -12,7 +12,7 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'org.spongepowered.mixin'
+
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
@@ -129,6 +129,8 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.16.5:3.0.19')
 
+    annotationProcessor 'org.spongepowered:mixin:0.8:processor'
+
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
     // compile "some.group:artifact:version"
@@ -183,6 +185,8 @@ publishing {
         }
     }
 }
+
+apply plugin: 'org.spongepowered.mixin'
 
 mixin {
     add sourceSets.main, "mimic.refmap.json"
