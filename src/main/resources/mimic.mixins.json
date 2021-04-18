@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "mimic.refmap.json",
   "mixins": [
+    "MixinDungeonsFeature",
     "MixinEndCityPieces",
     "MixinIglooPieces",
     "MixinStructurePiece"

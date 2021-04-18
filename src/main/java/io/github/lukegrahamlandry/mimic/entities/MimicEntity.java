@@ -33,6 +33,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -44,6 +45,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 import java.util.UUID;
 
 public class MimicEntity extends CreatureEntity implements IAnimatable, INamedContainerProvider, IInventory {
@@ -264,8 +266,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             }
         }
 
-        MimicMain.LOGGER.debug(this.heldItems);
-
         ItemEntity item = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), stack);
         this.level.addFreshEntity(item);
     }
@@ -325,7 +325,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
         if (this.isTamed()){
             this.owner = UUID.fromString(compoundNBT.getString("owner"));
-            MimicMain.LOGGER.debug("loaded owner: " + this.owner);
         }
 
     }
@@ -423,7 +422,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public void setStealth(boolean flag) {
-        MimicMain.LOGGER.debug("stealth: " + flag);
         if (!isStealth() && flag){
             this.getEntityData().set(UP_DOWN_TICK, 20);
         } else if (isStealth() && !flag){
@@ -433,7 +431,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public void setLocked(boolean flag) {
-        MimicMain.LOGGER.debug("lock: " + flag);
         if (!isLocked() && flag){
             this.getEntityData().set(UP_DOWN_TICK, 28);
         }
@@ -549,5 +546,14 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     @Override
     public void clearContent() {
         this.heldItems.clear();
+    }
+
+    public static <T extends MobEntity> boolean checkSpawn(EntityType<T> type, IServerWorld world, SpawnReason reason, BlockPos pos, Random rand) {
+        if (world.getBlockState(pos).is(Blocks.CAVE_AIR) && world.getBlockState(pos.below()).is(Blocks.STONE)) {
+            MimicMain.LOGGER.debug("spawn mimic at " + pos);
+            return true;
+        }
+
+        return false;
     }
 }

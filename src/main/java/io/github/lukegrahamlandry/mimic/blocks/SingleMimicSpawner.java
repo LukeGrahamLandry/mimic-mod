@@ -1,5 +1,6 @@
-package io.github.lukegrahamlandry.mimic;
+package io.github.lukegrahamlandry.mimic.blocks;
 
+import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
 import io.github.lukegrahamlandry.mimic.init.EntityInit;
 import net.minecraft.block.Block;

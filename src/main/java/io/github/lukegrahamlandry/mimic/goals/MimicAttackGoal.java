@@ -29,7 +29,6 @@ public class MimicAttackGoal extends Goal {
     @Override
     public void start() {
         this.owner.startAttackAnim();
-        MimicMain.LOGGER.debug("Attack!");
     }
 
     @Override

@@ -1,7 +1,7 @@
 package io.github.lukegrahamlandry.mimic.init;
 
 import io.github.lukegrahamlandry.mimic.MimicMain;
-import io.github.lukegrahamlandry.mimic.SingleMimicSpawner;
+import io.github.lukegrahamlandry.mimic.blocks.SingleMimicSpawner;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

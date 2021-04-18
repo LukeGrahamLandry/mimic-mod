@@ -50,9 +50,6 @@ public class MimicContainer extends Container {
         for(int i1 = 0; i1 < 9; ++i1) {
             this.addSlot(new Slot(p_i50092_3_, i1, 8 + i1 * 18, 161 + i));
         }
-
-        MimicMain.LOGGER.debug("rows: " + containerRows);
-
     }
 
     public boolean stillValid(PlayerEntity p_75145_1_) {
