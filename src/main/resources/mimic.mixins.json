@@ -4,6 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "mimic.refmap.json",
   "mixins": [
+    "MixinEndCityPieces",
+    "MixinIglooPieces",
     "MixinStructurePiece"
   ],
   "minVersion": "0.8"

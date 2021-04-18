@@ -4,20 +4,16 @@ import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.client.MimicContainer;
 import io.github.lukegrahamlandry.mimic.goals.*;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
+import io.github.lukegrahamlandry.mimic.init.EntityInit;
 import io.github.lukegrahamlandry.mimic.init.ItemInit;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.monster.ZombieEntity;
-import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
@@ -36,7 +32,6 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -48,13 +43,9 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class MimicEntity extends CreatureEntity implements IAnimatable, INamedContainerProvider, IInventory {
-
     private AnimationFactory factory = new AnimationFactory(this);
 
     private static final DataParameter<Boolean> IS_TAMED = EntityDataManager.defineId(MimicEntity.class, DataSerializers.BOOLEAN);
@@ -71,6 +62,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     int playerLookTicks = 0;
     PlayerEntity playerLooking;
     int scaredTicks = 0;
+    boolean hasAlreadyGeneratedLoot = false;
 
     private NonNullList<ItemStack> heldItems = NonNullList.withSize(27, ItemStack.EMPTY);
 
@@ -261,11 +253,13 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     private void generateDefaultLoot() {
-        if (this.level.isClientSide()) return;
+        if (this.level.isClientSide() || this.hasAlreadyGeneratedLoot) return;
         ResourceLocation lootLocation = new ResourceLocation(MimicMain.MOD_ID, "default_mimic_loot");
         LootTable loottable = this.level.getServer().getLootTables().get(lootLocation);
         LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level)).withParameter(LootParameters.ORIGIN, this.position());
         loottable.fill(this, lootcontext$builder.create(LootParameterSets.CHEST));
+
+        this.hasAlreadyGeneratedLoot = true;
     }
 
     @Override
@@ -285,6 +279,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         compoundNBT.putBoolean("lock", isLocked());
         compoundNBT.putBoolean("angry", isAngry());
         compoundNBT.putBoolean("stealth", isStealth());
+        compoundNBT.putBoolean("genloot", this.hasAlreadyGeneratedLoot);
 
         if (this.isTamed()){
             compoundNBT.putString("owner", this.owner.toString());
@@ -308,6 +303,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         setLocked(compoundNBT.getBoolean("lock"));
         setStealth(compoundNBT.getBoolean("stealth"));
         setAngry(compoundNBT.getBoolean("angry"));
+        this.hasAlreadyGeneratedLoot = compoundNBT.getBoolean("genloot");
 
         if (this.isTamed()){
             this.owner = UUID.fromString(compoundNBT.getString("owner"));

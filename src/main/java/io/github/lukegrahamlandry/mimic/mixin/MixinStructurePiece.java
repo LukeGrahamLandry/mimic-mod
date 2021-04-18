@@ -2,7 +2,9 @@ package io.github.lukegrahamlandry.mimic.mixin;
 
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
+import io.github.lukegrahamlandry.mimic.init.BlockInit;
 import io.github.lukegrahamlandry.mimic.init.EntityInit;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.tileentity.ChestTileEntity;
@@ -28,12 +30,11 @@ public class MixinStructurePiece {
     @Inject(at = @At("RETURN"), method = "createChest(Lnet/minecraft/world/IServerWorld;Lnet/minecraft/util/math/MutableBoundingBox;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/BlockState;)Z")
     private void createChest(IServerWorld world, MutableBoundingBox p_191080_2_, Random rand, BlockPos pos, ResourceLocation loottable, @Nullable BlockState state, CallbackInfoReturnable<Boolean> callback) {
         MimicMain.LOGGER.debug("!! createChest mixin !!");
-        // world.setBlock(pos, Blocks.DIAMOND_BLOCK.defaultBlockState(), 3);
-        if (world.getBlockState(pos.above()).isAir()){
-            MimicMain.LOGGER.debug("spawn mimic at " + pos.above());
-            MimicEntity e = new MimicEntity(EntityInit.MIMIC.get(), world.getLevel());
-            e.setPos(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D);
-            world.addFreshEntity(e);
+
+        BlockState topState = world.getBlockState(pos.above());
+        if (topState.getBlock() == Blocks.STRUCTURE_BLOCK || topState.getBlock() == Blocks.VINE || topState.isAir()){
+            world.setBlock(pos.above(), BlockInit.SINGLE_MIMIC_SPAWN.get().defaultBlockState(), 3);
+            world.getBlockTicks().scheduleTick(pos.above(), BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
         }
     }
 }
