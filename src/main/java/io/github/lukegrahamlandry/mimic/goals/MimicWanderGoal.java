@@ -24,7 +24,7 @@ public class MimicWanderGoal extends RandomWalkingGoal {
 
     public boolean canUse() {
         if (this.mimic.isAngry() || this.mimic.isStealth() || this.mimic.isLocked() || this.mimic.isOpen()) return false;
-        if (this.mob.getRandom().nextInt(40) != 0) return false;
+        if (this.mob.getRandom().nextInt( this.mimic.isTamed() ? 100 : 40) != 0) return false;
         if (!this.mob.getNavigation().isDone()) return false;
 
         Vector3d vector3d = this.getPosition();
@@ -42,10 +42,10 @@ public class MimicWanderGoal extends RandomWalkingGoal {
     @Nullable
     protected Vector3d getPosition() {
         if (this.mob.isInWaterOrBubble()) {
-            Vector3d vector3d = RandomPositionGenerator.getLandPos(this.mob, 15, 7);
+            Vector3d vector3d = RandomPositionGenerator.getLandPos(this.mob, this.mimic.isTamed() ? 15 : 5, 7);
             return vector3d == null ? super.getPosition() : vector3d;
         } else {
-            return this.mob.getRandom().nextFloat() >= this.probability ? RandomPositionGenerator.getLandPos(this.mob, 10, 7) : super.getPosition();
+            return this.mob.getRandom().nextFloat() >= this.probability ? RandomPositionGenerator.getLandPos(this.mob,  this.mimic.isTamed() ? 10 : 5, 7) : super.getPosition();
         }
     }
 }

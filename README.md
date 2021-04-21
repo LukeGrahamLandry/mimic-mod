@@ -1,6 +1,6 @@
 # Mimic Mod 
 
-A stealthy new mob commissioned by Redrix
+A Minecraft mod for forge 1.16.5 that adds a stealthy new mob commissioned by Redrix ($120)
 
 ## Features 
 - mimic monster that looks exactly like a chest
@@ -18,10 +18,11 @@ A stealthy new mob commissioned by Redrix
 - tame it with a mimic key
     - then it will follow you and can be used as storage
     - shift right click it to make it sit and stealth
+    - can only be opened while sitting
   
 ## Dependencies 
 - [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib/files/3261545)
 
 ## Credits 
-- Code: [Luke Graham Landry](https://github.com/LukeGrahamLandry)
-- Assets: Redrix
+- [Luke Graham Landry](https://github.com/LukeGrahamLandry) (Code)
+- [Redrix](https://www.curseforge.com/members/redrixttv/projects) (Assets, Ideas & Funding)

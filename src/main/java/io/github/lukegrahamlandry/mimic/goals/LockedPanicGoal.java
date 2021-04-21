@@ -72,6 +72,7 @@ public class LockedPanicGoal extends Goal {
     public void start() {
         this.mob.getNavigation().moveTo(this.posX, this.posY, this.posZ, this.speedModifier);
         this.isRunning = true;
+        this.mob.setStealth(false);
     }
 
     public void stop() {
