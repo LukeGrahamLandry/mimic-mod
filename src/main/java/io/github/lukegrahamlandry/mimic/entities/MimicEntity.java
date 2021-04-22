@@ -73,7 +73,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     boolean hasAlreadyGeneratedLoot = false;
 
     private NonNullList<ItemStack> heldItems = NonNullList.withSize(27, ItemStack.EMPTY);
-    private int facingDirection = -1;
 
     private static final int boredOfWanderingChance = 2 * 60 * 20;
 
@@ -143,7 +142,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         this.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, dir.get2DDataValue() * 90, 0);
         this.setYBodyRot(dir.get2DDataValue() * 90);
         this.getNavigation().moveTo((Path) null, 0);
-        this.facingDirection = dir.get2DDataValue();
     }
 
     // decides which animation to play. animationName is from the json file in resources/id/animations

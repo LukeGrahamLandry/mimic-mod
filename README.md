@@ -8,18 +8,19 @@ A Minecraft mod for forge 1.16.5 that adds a stealthy new mob commissioned by Re
     - if it cant find one after a while it will just sit down and wait
     - snaps to block to stealth when it eats something
     - stores items from eaten chests which can be removed from its gui and are dropped on death
-    - if it can't find a chest to eat it generates random loot 
+    - if it doesn't eat a chest it generates random loot (data packs can override the mimic:default_mimic_loot loot table)
     - will attack you when you try to open it
     - takes extra damage from axes
-    - spawn in: igloo, end city, woodland mansion, desert temple, jungle temple, nether fortress, stronghold, dungeon, very small chance in caves
-- lock it with a mimic lock
+    - spawn in: igloo, end city, woodland mansion, desert temple, jungle temple, nether fortress, stronghold, dungeon
+- lock it with a Mimic Lock
     - it will not attack you 
     - has a chance to run away each time you steal an item
-- tame it with a mimic key
+- tame it with a Mimic Key
     - then it will follow you and can be used as storage
     - shift right click it to make it sit and stealth
     - can only be opened while sitting
-  
+- shift right click a chest with a Fake Chest to summon a mimic
+
 ## Dependencies 
 - [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib/files/3261545)
 
