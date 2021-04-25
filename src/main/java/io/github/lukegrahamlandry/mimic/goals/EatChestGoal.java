@@ -61,7 +61,7 @@ public class EatChestGoal extends Goal {
                 this.owner.addItem(chest.getItem(i));
                 chest.setItem(i, ItemStack.EMPTY);
             }
-            this.owner.addItem(new ItemStack(Items.CHEST));
+            // this.owner.addItem(new ItemStack(Items.CHEST));
 
             this.owner.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             this.owner.snapToBlock(pos, state.getValue(ChestBlock.FACING));

@@ -34,6 +34,7 @@ import net.minecraft.pathfinding.Path;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -114,6 +115,8 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
                 if (this.playerLookTicks == 0 && !isLocked() && !isTamed()){
                     this.playerLooking.closeContainer();
                     this.setAngry(true);
+                    float strength = 1;
+                    this.playerLooking.knockback(strength * 0.5F, MathHelper.sin(this.yRot * ((float)Math.PI / 180F)), (-MathHelper.cos(this.yRot * ((float)Math.PI / 180F))));
                 }
             }
 
@@ -124,7 +127,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             }
 
             // stealth if a player is near
-            if (!this.isAngry() && !this.isStealth() && !this.isTamed() && getRandom().nextInt(5) == 0){
+            if (!this.isAngry() && !this.isStealth() && !this.isTamed() && !this.isLocked() && getRandom().nextInt(5) == 0){
                 AxisAlignedBB box = this.getBoundingBox().inflate(10);  // range in blocks
                 for(PlayerEntity playerentity : level.players()) {
                     if (!playerentity.isCreative() && box.contains(playerentity.getX(), playerentity.getY(), playerentity.getZ())) {
@@ -158,25 +161,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.chest.open", false));
             }
             return PlayState.CONTINUE;
-            /*
-            if (this.getEntityData().get(OPEN_CLOSE_TICK) > 0){
-                if (isLocked()){
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.locked.mimic.chest.open", false).addAnimation("animation.locked.mimic.chest.open.idle", true));
-                } else {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.chest.open", false).addAnimation("animation.mimic.chest.open.idle", true));
-                }
-                return PlayState.CONTINUE;
-            }
-
-            if (isLocked()){
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.locked.mimic.chest.open.idle", true));
-            } else {
-                MimicMain.LOGGER.debug("open idle");
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.chest.open.idle", true));
-            }
-            return PlayState.CONTINUE;
-
-             */
 
         } else if (this.getEntityData().get(OPEN_CLOSE_TICK) > 0){
             if (isLocked()){
@@ -198,6 +182,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.lockidle", true));
             return PlayState.CONTINUE;
         } else if (this.isLocked() && this.getEntityData().get(UP_DOWN_TICK) > 0){
+            // MimicMain.LOGGER.debug("lock getup");
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.locked.mimic.getup", false));
             return PlayState.CONTINUE;
         }
@@ -212,11 +197,8 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return PlayState.CONTINUE;
 
         } else if (this.getEntityData().get(UP_DOWN_TICK) > 0){
-            if (this.isLocked()){
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.locked.mimic.getup", false));
-            } else {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.getup", false));
-            }
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.getup", false));
+
             return PlayState.CONTINUE;
         }
 
@@ -282,6 +264,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         if (stack.getItem() == ItemInit.MIMIC_KEY.get() && !this.isTamed()){
             if (!level.isClientSide()){
                 this.setTamed(true);
+                this.setStealth(true);
                 if (!player.isCreative()) stack.shrink(1);
                 this.owner = player.getUUID();
                 this.getNavigation().moveTo((Path) null, 0);
@@ -313,6 +296,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public void addItem(ItemStack stack) {
+        if (stack.isEmpty()) return;
         this.hasAlreadyGeneratedLoot = true;
 
         for (int i=0;i<this.heldItems.size();i++){
@@ -394,7 +378,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             amount *= 2;
         }
 
-        if (source.getDirectEntity() != null && source.getDirectEntity() instanceof PlayerEntity && !((PlayerEntity)source.getDirectEntity()).isCreative()){
+        if (!level.isClientSide() && source.getDirectEntity() != null && source.getDirectEntity() instanceof PlayerEntity && !((PlayerEntity)source.getDirectEntity()).isCreative()){
             this.setAngry(true);
         }
 
@@ -472,8 +456,8 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
     public void setAngry(boolean flag) {
         if (flag){
-            if (isTamed() || isLocked()) return;
             setStealth(false);
+            if (isTamed() || isLocked()) return;
         }
         this.getEntityData().set(IS_ANGRY, flag);
     }
@@ -485,6 +469,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             this.getEntityData().set(UP_DOWN_TICK, 22);
         }
         this.getEntityData().set(IS_STEALTH, flag);
+        MimicMain.LOGGER.debug("stealth: " + flag);
     }
 
     public void setLocked(boolean flag) {
@@ -530,7 +515,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return new MimicContainer(ContainerInit.TAME_MIMIC.get(), id, playerInventory, this, 3);
         } else {
             this.playerLooking = player;
-            this.playerLookTicks = 10;
+            this.playerLookTicks = 15;
             return new MimicContainer(ContainerInit.EVIL_MIMIC.get(), id, playerInventory, this, 3);
         }
     }
@@ -578,18 +563,22 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         return this.heldItems.get(index);
     }
 
+    private void onTake(){
+        this.playerLookTicks = 2;
+        MimicMain.LOGGER.debug("take item");
+        if (this.isLocked() && getRandom().nextInt(3) == 0){
+            this.playerLooking.closeContainer();
+            this.scaredTicks = 400;
+            this.setStealth(false);
+        }
+    }
+
     @Override
     public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
         ItemStack itemstack = ItemStackHelper.removeItem(this.heldItems, p_70298_1_, p_70298_2_);
         if (!itemstack.isEmpty()) {
             this.setChanged();
-
-            this.playerLookTicks = 2;
-            if (this.isLocked() && getRandom().nextInt(3) == 0){
-                this.playerLooking.closeContainer();
-                this.scaredTicks = 200;
-                this.setStealth(false);
-            }
+            onTake();
         }
 
         return itemstack;
@@ -597,12 +586,16 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
     @Override
     public ItemStack removeItemNoUpdate(int p_70304_1_) {
-        return ItemStackHelper.takeItem(this.heldItems, p_70304_1_);
+        ItemStack itemstack = ItemStackHelper.takeItem(this.heldItems, p_70304_1_);
+        if (!itemstack.isEmpty()) onTake();
+
+        return itemstack;
     }
 
     @Override
     public void setItem(int index, ItemStack stack) {
         this.heldItems.set(index, stack);
+        if (stack.isEmpty()) onTake();
     }
 
     @Override

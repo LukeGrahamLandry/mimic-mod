@@ -56,7 +56,6 @@ public class TickHandler {
                 mimic.addItem(chest.getItem(i));
                 chest.setItem(i, ItemStack.EMPTY);
             }
-            mimic.addItem(new ItemStack(Items.CHEST));
 
             spawn.world.setBlock(spawn.pos, Blocks.AIR.defaultBlockState(), 3);
             mimic.snapToBlock(spawn.pos, state.getValue(ChestBlock.FACING));
