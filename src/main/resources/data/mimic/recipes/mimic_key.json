@@ -7,10 +7,10 @@
   ],
   "key": {
     "i": {
-      "item": "minecraft:iron_nugget"
+      "item": "minecraft:netherite_scrap"
     },
     "g": {
-      "item": "minecraft:gold_nugget"
+      "item": "minecraft:gold_ingot"
     }
   },
   "result": {

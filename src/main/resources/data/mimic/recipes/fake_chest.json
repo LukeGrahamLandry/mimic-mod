@@ -1,37 +1,37 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "abc",
-    "def",
-    "ghi"
+    "gsi",
+    "bcr",
+    "peo"
   ],
   "key": {
-    "a": {
-      "item": "minecraft:gold_block"
-    },
-    "b": {
-      "item": "minecraft:spider_eye"
-    },
-    "c": {
+    "i": {
       "item": "minecraft:iron_block"
     },
-    "d": {
-      "item": "minecraft:bone"
+    "g": {
+      "item": "minecraft:gold_block"
     },
-    "e": {
+    "s": {
+      "item": "minecraft:fermented_spider_eye"
+    },
+    "b": {
+      "item": "minecraft:nether_wart"
+    },
+    "c": {
       "item": "minecraft:chest"
     },
-    "f": {
-      "item": "minecraft:rotten_flesh"
+    "r": {
+      "item": "minecraft:blaze_powder"
     },
-    "g": {
-      "item": "minecraft:gold_ore"
-    },
-    "h": {
+    "e": {
       "item": "minecraft:ender_pearl"
     },
-    "i": {
-      "item": "minecraft:iron_ore"
+    "o": {
+      "item": "minecraft:diamond_ore"
+    },
+    "p": {
+      "item": "minecraft:gold_ore"
     }
   },
   "result": {

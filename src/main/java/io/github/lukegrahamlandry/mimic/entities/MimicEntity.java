@@ -240,6 +240,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     protected ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         if (hand == Hand.OFF_HAND) return ActionResultType.PASS;
 
+        // sit / stand
         if (isTamed() && player.isShiftKeyDown() && !this.level.isClientSide()){
             boolean targetState = !this.isStealth();
             this.setStealth(targetState);
@@ -251,9 +252,10 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return ActionResultType.SUCCESS;
         }
 
-
         ItemStack stack = player.getItemInHand(hand);
-        if (stack.getItem() == ItemInit.MIMIC_LOCK.get() && !this.isTamed()){
+
+        // lock
+        if (stack.getItem() == ItemInit.MIMIC_LOCK.get() && !this.isTamed() && !this.isLocked()){
             this.setLocked(true);
             this.snapToBlock(this.blockPosition(), Direction.from2DDataValue(Math.floorDiv((int) this.yBodyRot, 90)));
             if (!player.isCreative()) stack.shrink(1);
@@ -261,7 +263,8 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return ActionResultType.CONSUME;
         }
 
-        if (stack.getItem() == ItemInit.MIMIC_KEY.get() && !this.isTamed()){
+        // tame
+        if (stack.getItem() == ItemInit.MIMIC_KEY.get() && !this.isTamed() && !this.isLocked()){
             if (!level.isClientSide()){
                 this.setTamed(true);
                 this.setStealth(true);
@@ -275,6 +278,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             return ActionResultType.CONSUME;
         }
 
+        // open
         if (this.isStealth() && !player.isShiftKeyDown()){
             if (this.isEmpty()) this.generateDefaultLoot();
             player.openMenu(this);
@@ -378,7 +382,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             amount *= 2;
         }
 
-        if (!level.isClientSide() && source.getDirectEntity() != null && source.getDirectEntity() instanceof PlayerEntity && !((PlayerEntity)source.getDirectEntity()).isCreative()){
+        if (!level.isClientSide() && source.getEntity() != null && source.getEntity() instanceof PlayerEntity && !((PlayerEntity)source.getDirectEntity()).isCreative()){
             this.setAngry(true);
         }
 
