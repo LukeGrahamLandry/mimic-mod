@@ -5,6 +5,7 @@ import io.github.lukegrahamlandry.mimic.client.MimicContainer;
 import io.github.lukegrahamlandry.mimic.goals.*;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
 import io.github.lukegrahamlandry.mimic.init.ItemInit;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
@@ -198,7 +199,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
         } else if (this.getEntityData().get(UP_DOWN_TICK) > 0){
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.getup", false));
-
+            // MimicMain.LOGGER.debug("getup");
             return PlayState.CONTINUE;
         }
 
@@ -271,11 +272,12 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
                 if (!player.isCreative()) stack.shrink(1);
                 this.owner = player.getUUID();
                 this.getNavigation().moveTo((Path) null, 0);
-            } else {
-                MimicMain.LOGGER.debug("particles");
-                spawnTamingParticles();  // doesnt work
+                // still doesnt work??
+                for(int i = 0; i < 7; ++i) {
+                    ((ServerWorld)level).sendParticles(ParticleTypes.HEART, getBoundingBox().getCenter().x + (random.nextDouble() * 3 - 1.5D), getY() + 1, getBoundingBox().getCenter().z + (random.nextDouble() * 3 - 1.5D), 1, 0.0D, 0.0D, 0.0D, 1.0D);
+                }
             }
-            return ActionResultType.CONSUME;
+            return ActionResultType.sidedSuccess(level.isClientSide());
         }
 
         // open
@@ -382,7 +384,7 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             amount *= 2;
         }
 
-        if (!level.isClientSide() && source.getEntity() != null && source.getEntity() instanceof PlayerEntity && !((PlayerEntity)source.getDirectEntity()).isCreative()){
+        if (!level.isClientSide() && !this.isTamed() && source.getEntity() != null && source.getEntity() instanceof PlayerEntity && !((PlayerEntity)source.getEntity()).isCreative()){
             this.setAngry(true);
         }
 
@@ -477,13 +479,14 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     }
 
     public void setLocked(boolean flag) {
-        if (!isLocked() && flag){
-            this.getEntityData().set(UP_DOWN_TICK, 28);
-        }
         if (flag){
             setAngry(false);
             setStealth(true);
         }
+        if (!isLocked() && flag){
+            this.getEntityData().set(UP_DOWN_TICK, 28);
+        }
+
         this.getEntityData().set(IS_LOCKED, flag);
     }
 
@@ -524,32 +527,25 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    protected void spawnTamingParticles() {
-        IParticleData iparticledata = ParticleTypes.HEART;
-
-        for(int i = 0; i < 7; ++i) {
-            double d0 = this.random.nextGaussian() * 0.02D;
-            double d1 = this.random.nextGaussian() * 0.02D;
-            double d2 = this.random.nextGaussian() * 0.02D;
-            this.level.addParticle(iparticledata, this.getRandomX(1.0D), this.getRandomY() + 2.5D, this.getRandomZ(1.0D), d0, d1, d2);
-        }
-
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState state) {
+        this.playSound(SoundEvents.WOOD_STEP, 0.15F, 1.0F);
     }
 
     // IInventory
 
     @Override
-    public void stopOpen(PlayerEntity p_174886_1_) {
+    public void stopOpen(PlayerEntity player) {
         this.getEntityData().set(OPEN_CLOSE_TICK, 10);
         this.getEntityData().set(IS_OPEN, false);
-        MimicMain.LOGGER.debug("stop open");
+        this.level.playSound((PlayerEntity)null, getX(), getY(), getZ(), SoundEvents.CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, random.nextFloat() * 0.1F + 0.9F);
     }
 
     @Override
-    public void startOpen(PlayerEntity p_174889_1_) {
+    public void startOpen(PlayerEntity player) {
         this.getEntityData().set(OPEN_CLOSE_TICK, 13);
         this.getEntityData().set(IS_OPEN, true);
+        this.level.playSound((PlayerEntity)null, getX(), getY(), getZ(), SoundEvents.CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, random.nextFloat() * 0.1F + 0.9F);
     }
 
     @Override

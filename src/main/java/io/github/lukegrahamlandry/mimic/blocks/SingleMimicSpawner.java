@@ -25,7 +25,7 @@ public class SingleMimicSpawner extends Block {
     public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
 
-        if (rand.nextInt(10) == 0){
+        if (rand.nextInt(5) == 0){
             MimicMain.LOGGER.debug("spawn mimic at " + pos);
             MimicEntity e = new MimicEntity(EntityInit.MIMIC.get(), world);
             e.setPos(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
