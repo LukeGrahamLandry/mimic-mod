@@ -1,8 +1,7 @@
 package io.github.lukegrahamlandry.mimic.goals;
 
-import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
-import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 public class MimicAttackGoal extends Goal {
     MimicEntity owner;

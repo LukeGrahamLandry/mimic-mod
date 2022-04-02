@@ -1,12 +1,10 @@
 package io.github.lukegrahamlandry.mimic.items;
 
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraftforge.fmllegacy.RegistryObject;
 
 import javax.annotation.Nullable;
 
@@ -23,7 +21,7 @@ public class ModSpawnEgg extends SpawnEggItem {
     }
 
     @Override
-    public EntityType<?> getType(@Nullable CompoundNBT p_208076_1_) {
+    public EntityType<?> getType(@Nullable CompoundTag p_208076_1_) {
         return this.toSpawn.get();
     }
 }

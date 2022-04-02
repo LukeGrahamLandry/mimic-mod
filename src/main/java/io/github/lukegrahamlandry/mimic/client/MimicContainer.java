@@ -1,33 +1,31 @@
 package io.github.lukegrahamlandry.mimic.client;
 
-import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class MimicContainer extends Container {
-    private final IInventory container;
+public class MimicContainer extends AbstractContainerMenu {
+    private final Container container;
     private final int containerRows;
 
-    public static MimicContainer create(int p_216986_0_, PlayerInventory p_216986_1_, PacketBuffer extraData) {
+    public static MimicContainer create(int p_216986_0_, Inventory p_216986_1_, FriendlyByteBuf extraData) {
         return new MimicContainer(ContainerInit.EVIL_MIMIC.get(), p_216986_0_, p_216986_1_, 3);
     }
 
-    public MimicContainer(ContainerType<?> p_i50091_1_, int p_i50091_2_, PlayerInventory p_i50091_3_, int p_i50091_4_) {
-        this(p_i50091_1_, p_i50091_2_, p_i50091_3_, new Inventory(9 * p_i50091_4_), p_i50091_4_);
+    public MimicContainer(MenuType<?> p_i50091_1_, int p_i50091_2_, Inventory p_i50091_3_, int p_i50091_4_) {
+        this(p_i50091_1_, p_i50091_2_, p_i50091_3_, new SimpleContainer(9 * p_i50091_4_), p_i50091_4_);
     }
 
-    public MimicContainer(ContainerType<?> p_i50092_1_, int p_i50092_2_, PlayerInventory p_i50092_3_, IInventory p_i50092_4_, int p_i50092_5_) {
+    public MimicContainer(MenuType<?> p_i50092_1_, int p_i50092_2_, Inventory p_i50092_3_, Container p_i50092_4_, int p_i50092_5_) {
         super(p_i50092_1_, p_i50092_2_);
         checkContainerSize(p_i50092_4_, p_i50092_5_ * 9);
         this.container = p_i50092_4_;
@@ -52,11 +50,11 @@ public class MimicContainer extends Container {
         }
     }
 
-    public boolean stillValid(PlayerEntity p_75145_1_) {
+    public boolean stillValid(Player p_75145_1_) {
         return this.container.stillValid(p_75145_1_);
     }
 
-    public ItemStack quickMoveStack(PlayerEntity p_82846_1_, int p_82846_2_) {
+    public ItemStack quickMoveStack(Player p_82846_1_, int p_82846_2_) {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(p_82846_2_);
         if (slot != null && slot.hasItem()) {
@@ -80,12 +78,12 @@ public class MimicContainer extends Container {
         return itemstack;
     }
 
-    public void removed(PlayerEntity p_75134_1_) {
+    public void removed(Player p_75134_1_) {
         super.removed(p_75134_1_);
         this.container.stopOpen(p_75134_1_);
     }
 
-    public IInventory getContainer() {
+    public Container getContainer() {
         return this.container;
     }
 

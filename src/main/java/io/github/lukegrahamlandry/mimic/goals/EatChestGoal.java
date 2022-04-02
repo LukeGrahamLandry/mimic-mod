@@ -2,19 +2,13 @@ package io.github.lukegrahamlandry.mimic.goals;
 
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.pathfinding.Path;
-import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class EatChestGoal extends Goal {
     MimicEntity owner;
@@ -54,7 +48,7 @@ public class EatChestGoal extends Goal {
         BlockState state = this.owner.level.getBlockState(pos);
         // take items from the chest and break it
         if (this.owner.getAttackTick() == 3 && state.is(Blocks.CHEST)){
-            ChestTileEntity chest = (ChestTileEntity) this.owner.level.getBlockEntity(pos);
+            ChestBlockEntity chest = (ChestBlockEntity) this.owner.level.getBlockEntity(pos);
 
             // take items
             for (int i=0;i<chest.getContainerSize();i++){

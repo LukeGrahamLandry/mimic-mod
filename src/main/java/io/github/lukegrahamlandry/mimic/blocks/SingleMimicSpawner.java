@@ -3,12 +3,12 @@ package io.github.lukegrahamlandry.mimic.blocks;
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
 import io.github.lukegrahamlandry.mimic.init.EntityInit;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.block.ChestBlock;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.Random;
 
@@ -22,7 +22,7 @@ public class SingleMimicSpawner extends Block {
     }
 
     @Override
-    public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
+    public void tick(BlockState state, ServerLevel world, BlockPos pos, Random rand) {
         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
 
         if (rand.nextInt(5) == 0){

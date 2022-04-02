@@ -3,10 +3,10 @@ package io.github.lukegrahamlandry.mimic.client;
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.init.ContainerInit;
 import io.github.lukegrahamlandry.mimic.init.EntityInit;
-import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
@@ -14,10 +14,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class RenderHandler {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        RenderingRegistry.registerEntityRenderingHandler(EntityInit.MIMIC.get(), MimicRenderer::new);
+        EntityRenderers.register(EntityInit.MIMIC.get(), MimicRenderer::new);
 
-        ScreenManager.register(ContainerInit.EVIL_MIMIC.get(), CustomChestScreen::createEvil);
+        MenuScreens.register(ContainerInit.EVIL_MIMIC.get(), CustomChestScreen::createEvil);
 
-        ScreenManager.register(ContainerInit.TAME_MIMIC.get(), CustomChestScreen::createTame);
+        MenuScreens.register(ContainerInit.TAME_MIMIC.get(), CustomChestScreen::createTame);
     }
 }

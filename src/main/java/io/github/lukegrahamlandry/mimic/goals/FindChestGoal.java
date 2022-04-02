@@ -1,17 +1,14 @@
 package io.github.lukegrahamlandry.mimic.goals;
 
-import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
-import net.minecraft.block.*;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.goal.MoveToBlockGoal;
-import net.minecraft.pathfinding.Path;
-import net.minecraft.state.properties.BedPart;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Path;
 
 public class FindChestGoal extends MoveToBlockGoal {
     private final MimicEntity mimic;
@@ -44,7 +41,7 @@ public class FindChestGoal extends MoveToBlockGoal {
         // this.mimic.setDeltaMovement(0,0,0);
     }
 
-    protected boolean isValidTarget(IWorldReader p_179488_1_, BlockPos p_179488_2_) {
+    protected boolean isValidTarget(LevelReader p_179488_1_, BlockPos p_179488_2_) {
         if (!p_179488_1_.isEmptyBlock(p_179488_2_.above())) {
             return false;
         } else {
@@ -52,7 +49,7 @@ public class FindChestGoal extends MoveToBlockGoal {
             if (blockstate.is(Blocks.CHEST)) {
                 this.target = p_179488_2_;
                 // this.mimic.setChestPos(p_179488_2_);
-                return ChestTileEntity.getOpenCount(p_179488_1_, p_179488_2_) < 1;
+                return ChestBlockEntity.getOpenCount(p_179488_1_, p_179488_2_) < 1;
             } else {
                 return false;
             }

@@ -1,9 +1,8 @@
 package io.github.lukegrahamlandry.mimic.goals;
 
-import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 public class MimicChaseGoal extends Goal {
     MimicEntity owner;

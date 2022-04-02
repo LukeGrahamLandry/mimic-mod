@@ -3,23 +3,16 @@ package io.github.lukegrahamlandry.mimic.events;
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
 import io.github.lukegrahamlandry.mimic.init.EntityInit;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntitySpawnPlacementRegistry;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.MobSpawnInfo;
-import net.minecraft.world.gen.Heightmap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +41,7 @@ public class TickHandler {
 
         BlockState state = spawn.world.getBlockState(spawn.pos);
         if (state.is(Blocks.CHEST)){
-            ChestTileEntity chest = (ChestTileEntity) spawn.world.getBlockEntity(spawn.pos);
+            ChestBlockEntity chest = (ChestBlockEntity) spawn.world.getBlockEntity(spawn.pos);
             MimicEntity mimic = new MimicEntity(EntityInit.MIMIC.get(), spawn.world);
 
             // take items
@@ -67,9 +60,9 @@ public class TickHandler {
     public static class MimicSpawnData {
         public final BlockPos pos;
         public int time;
-        public final World world;
+        public final Level world;
 
-        public MimicSpawnData(World level, BlockPos position){
+        public MimicSpawnData(Level level, BlockPos position){
             this.pos = position;
             this.time = 40;
             this.world = level;

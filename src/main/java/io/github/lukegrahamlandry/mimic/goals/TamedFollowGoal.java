@@ -1,23 +1,26 @@
 package io.github.lukegrahamlandry.mimic.goals;
 
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.pathfinding.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 
 import java.util.EnumSet;
 
 public class TamedFollowGoal extends Goal {
     private final MimicEntity tamable;
     private LivingEntity owner;
-    private final IWorldReader level;
+    private final LevelReader level;
     private final double speedModifier;
-    private final PathNavigator navigation;
+    private final PathNavigation navigation;
     private int timeToRecalcPath;
     private final float stopDistance;
     private final float startDistance;
@@ -33,7 +36,7 @@ public class TamedFollowGoal extends Goal {
         this.stopDistance = p_i225711_5_;
         this.canFly = p_i225711_6_;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
-        if (!(self.getNavigation() instanceof GroundPathNavigator) && !(self.getNavigation() instanceof FlyingPathNavigator)) {
+        if (!(self.getNavigation() instanceof GroundPathNavigation) && !(self.getNavigation() instanceof FlyingPathNavigation)) {
             throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
         }
     }
@@ -66,14 +69,14 @@ public class TamedFollowGoal extends Goal {
 
     public void start() {
         this.timeToRecalcPath = 0;
-        this.oldWaterCost = this.tamable.getPathfindingMalus(PathNodeType.WATER);
-        this.tamable.setPathfindingMalus(PathNodeType.WATER, 0.0F);
+        this.oldWaterCost = this.tamable.getPathfindingMalus(BlockPathTypes.WATER);
+        this.tamable.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
     }
 
     public void stop() {
         this.owner = null;
         this.navigation.stop();
-        this.tamable.setPathfindingMalus(PathNodeType.WATER, this.oldWaterCost);
+        this.tamable.setPathfindingMalus(BlockPathTypes.WATER, this.oldWaterCost);
     }
 
     public void tick() {
@@ -112,15 +115,15 @@ public class TamedFollowGoal extends Goal {
         } else if (!this.canTeleportTo(new BlockPos(p_226328_1_, p_226328_2_, p_226328_3_))) {
             return false;
         } else {
-            this.tamable.moveTo((double)p_226328_1_ + 0.5D, (double)p_226328_2_, (double)p_226328_3_ + 0.5D, this.tamable.yRot, this.tamable.xRot);
+            this.tamable.moveTo((double)p_226328_1_ + 0.5D, (double)p_226328_2_, (double)p_226328_3_ + 0.5D, this.tamable.getYRot(), this.tamable.getXRot());
             this.navigation.stop();
             return true;
         }
     }
 
     private boolean canTeleportTo(BlockPos p_226329_1_) {
-        PathNodeType pathnodetype = WalkNodeProcessor.getBlockPathTypeStatic(this.level, p_226329_1_.mutable());
-        if (pathnodetype != PathNodeType.WALKABLE) {
+        BlockPathTypes pathnodetype = WalkNodeEvaluator.getBlockPathTypeStatic(this.level, p_226329_1_.mutable());
+        if (pathnodetype != BlockPathTypes.WALKABLE) {
             return false;
         } else {
             BlockState blockstate = this.level.getBlockState(p_226329_1_.below());

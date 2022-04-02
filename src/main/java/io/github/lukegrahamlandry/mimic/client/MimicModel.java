@@ -2,7 +2,7 @@ package io.github.lukegrahamlandry.mimic.client;
 
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class MimicModel extends AnimatedGeoModel<MimicEntity> {
