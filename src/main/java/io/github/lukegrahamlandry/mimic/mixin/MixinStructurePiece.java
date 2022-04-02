@@ -26,7 +26,7 @@ public abstract class MixinStructurePiece {
         BlockState topState = world.getBlockState(pos.above());
         if (topState.getBlock() == Blocks.STRUCTURE_BLOCK || topState.getBlock() == Blocks.VINE || topState.isAir()){
             world.setBlock(pos.above(), BlockInit.SINGLE_MIMIC_SPAWN.get().defaultBlockState(), 3);
-            world.getBlockTicks().scheduleTick(pos.above(), BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
+            world.scheduleTick(pos.above(), BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
         }
     }
 }

@@ -21,7 +21,7 @@ public class MixinIglooPieces {
 
         if (tag.equals("chest")){
             world.setBlock(pos, BlockInit.SINGLE_MIMIC_SPAWN.get().defaultBlockState(), 3);
-            world.getBlockTicks().scheduleTick(pos, BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
+            world.scheduleTick(pos, BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
         }
     }
 }

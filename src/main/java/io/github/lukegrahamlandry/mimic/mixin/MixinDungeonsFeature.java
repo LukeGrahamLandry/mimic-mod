@@ -36,7 +36,7 @@ public class MixinDungeonsFeature {
             if (blockstate.is(Blocks.CHEST)){
                 MimicMain.LOGGER.debug("A: found dungeon chest at " + blockpos1);
                 world.setBlock(blockpos1.above(), BlockInit.SINGLE_MIMIC_SPAWN.get().defaultBlockState(), 3);
-                world.getBlockTicks().scheduleTick(blockpos1.above(), BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
+                world.scheduleTick(blockpos1.above(), BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
             }
         }
     }
