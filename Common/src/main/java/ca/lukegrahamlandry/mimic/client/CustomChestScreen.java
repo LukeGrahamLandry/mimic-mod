@@ -1,8 +1,8 @@
 package ca.lukegrahamlandry.mimic.client;
 
+import ca.lukegrahamlandry.mimic.Constants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import ca.lukegrahamlandry.mimic.MimicMain;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.GameRenderer;

@@ -16,6 +16,13 @@ public class Constants {
 	public static final ResourceLocation MIMIC_KEY_ID = new ResourceLocation(MOD_ID, "mimic_key");
 	public static final ResourceLocation MIMIC_LOCK_ID = new ResourceLocation(MOD_ID, "mimic_lock");
 	public static final ResourceLocation SINGLE_MIMIC_SPAWN_BLOCK_ID = new ResourceLocation(MOD_ID, "mimic_lock");
+    public static final ResourceLocation TAME_MIMIC_CONTAINER = new ResourceLocation(MOD_ID, "tame_mimic");
+	public static final ResourceLocation EVIL_MIMIC_CONTAINER = new ResourceLocation(MOD_ID, "evil_mimic");
+
+	public static final ResourceLocation MODEL_LOC = new ResourceLocation(Constants.MOD_ID, "geo/mimic.geo.json");
+	public static final ResourceLocation TAME_TEXTURE_LOC = new ResourceLocation(Constants.MOD_ID, "textures/entity/tamed_mimic.png");
+	public static final ResourceLocation EVIL_TEXTURE_LOC = new ResourceLocation(Constants.MOD_ID, "textures/entity/evil_mimic.png");
+	public static final ResourceLocation ANIM_LOC = new ResourceLocation(Constants.MOD_ID, "animations/mimic.animation.json");
 
 	public static Block getMimicSpawnBlock() {
 		return Registry.BLOCK.get(SINGLE_MIMIC_SPAWN_BLOCK_ID);

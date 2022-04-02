@@ -30,12 +30,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -43,11 +42,9 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import javax.annotation.Nullable;
-import java.util.Random;
 import java.util.UUID;
 
 public class MimicEntity extends PathfinderMob implements MenuProvider, Container {
@@ -77,7 +74,8 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
     }
 
     public static AttributeSupplier.Builder createMobAttributes() {
-        return AttributeSupplier.builder().add(Attributes.MAX_HEALTH, 60).add(Attributes.ATTACK_DAMAGE, 14).add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.MOVEMENT_SPEED, 0.55).add(Attributes.ARMOR).add(Attributes.ARMOR_TOUGHNESS).add(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).add(net.minecraftforge.common.ForgeMod.NAMETAG_DISTANCE.get()).add(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get()).add(Attributes.FOLLOW_RANGE, 32.0D).add(Attributes.ATTACK_KNOCKBACK);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 60).add(Attributes.ATTACK_DAMAGE, 14)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.MOVEMENT_SPEED, 0.55).add(Attributes.FOLLOW_RANGE, 32.0D);
     }
 
     @Override
@@ -90,7 +88,7 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
         this.goalSelector.addGoal(3, new FindChestGoal(this, 0.5D));
 
         this.goalSelector.addGoal(2, new LockedPanicGoal(this, 0.6));
-        this.goalSelector.addGoal(6, new TamedFollowGoal(this, 0.5D, 8.0F, 2.0F, false));
+        this.goalSelector.addGoal(6, new TamedFollowGoal(this, 0.75D, 8.0F, 2.0F, false));
 
         this.goalSelector.addGoal(7, new MimicWanderGoal(this, 0.5D));
     }
@@ -108,7 +106,7 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
             if (this.playerLookTicks > 0){
                 this.playerLookTicks--;
                 if (this.playerLookTicks == 0 && !isLocked() && !isTamed()){
-                    this.playerLooking.closeContainer();
+                    ((ServerPlayer)this.playerLooking).closeContainer();
                     this.setAngry(true);
                     float strength = 1;
                     this.playerLooking.knockback(strength * 0.5F, Mth.sin(this.getYRot() * ((float)Math.PI / 180F)), (-Mth.cos(this.getYRot() * ((float)Math.PI / 180F))));
@@ -130,6 +128,11 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
                     }
                 }
             }
+
+            // dont get stuck in blocks
+            if (this.isInWall() && this.isStealth()){
+                this.setPos(this.getX(), this.getY() + 1, this.getZ());
+            }
         }
     }
 
@@ -141,7 +144,7 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
     }
 
     // decides which animation to play. animationName is from the json file in resources/id/animations
-    public Pair<String, Boolean> predicate(){
+    public Pair<String, Boolean> animationPredicate(float limbSwingAmount){
         if (this.getAttackTick() > 0){
             return Pair.of("animation.mimic.attack", false);
         }
@@ -165,52 +168,40 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
 
         if (this.isLocked() && this.getEntityData().get(IS_STEALTH)){
             if (this.getEntityData().get(UP_DOWN_TICK) > 0){
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.lock", false));
-                return PlayState.CONTINUE;
+                return Pair.of("animation.mimic.lock", false);
             }
 
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.lockidle", true));
-            return PlayState.CONTINUE;
+            return Pair.of("animation.mimic.lockidle", true);
         } else if (this.isLocked() && this.getEntityData().get(UP_DOWN_TICK) > 0){
-            // MimicMain.LOGGER.debug("lock getup");
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.locked.mimic.getup", false));
-            return PlayState.CONTINUE;
+            return Pair.of("animation.locked.mimic.getup", false);
         }
 
         if (this.getEntityData().get(IS_STEALTH)){  // dont replace condition with isStealth(), it will break, im being too clever
             if (this.getEntityData().get(UP_DOWN_TICK) > 0){
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.sit", false));
-                return PlayState.CONTINUE;
+                return Pair.of("animation.mimic.sit", false);
             }
 
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.idle.chest", true));
-            return PlayState.CONTINUE;
+            return Pair.of("animation.mimic.idle.chest", true);
 
         } else if (this.getEntityData().get(UP_DOWN_TICK) > 0){
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.getup", false));
-            // MimicMain.LOGGER.debug("getup");
-            return PlayState.CONTINUE;
+            return Pair.of("animation.mimic.getup", false);
         }
 
-        if (!(event.getLimbSwingAmount() > -0.15F && event.getLimbSwingAmount() < 0.15F)) {
+        if (!(limbSwingAmount > -0.15F && limbSwingAmount < 0.15F)) {
             if (this.isLocked()){
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.locked.mimic.run", true));
+                return Pair.of("animation.locked.mimic.run", true);
             } else if (this.isAngry()){
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.run", true));
+                return Pair.of("animation.mimic.run", true);
             } else {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.walkcycle", true));
+                return Pair.of("animation.mimic.walkcycle", true);
             }
-
-            return PlayState.CONTINUE;
         }
 
         if (this.isLocked()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.locked.mimic.idle", true));
+            return Pair.of("animation.locked.mimic.idle", true);
         } else {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.mimic.idle", true));
+            return Pair.of("animation.mimic.idle", true);
         }
-
-        return PlayState.CONTINUE;
     }
 
     protected void defineSynchedData() {
@@ -469,7 +460,7 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
         if (!isStealth() && flag){
             this.getEntityData().set(UP_DOWN_TICK, 20);
         } else if (isStealth() && !flag){
-            this.getEntityData().set(UP_DOWN_TICK, 22);
+            this.getEntityData().set(UP_DOWN_TICK, 2); // 22 but animation doesnt play so just dont bother with the delay until i fix it
         }
         this.getEntityData().set(IS_STEALTH, flag);
     }
@@ -508,7 +499,8 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
             this.playerLooking = player;
             this.playerLookTicks = 15;
         }
-        return new MimicContainer(Registry.MENU.get(Constants.MIMIC_ENTITY_ID), id, playerInventory, this, 3);
+        MenuType<MimicContainer> menuType = (MenuType<MimicContainer>) Registry.MENU.get(this.isTamed() ? Constants.TAME_MIMIC_CONTAINER : Constants.EVIL_MIMIC_CONTAINER);
+        return new MimicContainer(menuType, id, playerInventory, this, 3);
     }
 
     @Override
@@ -599,13 +591,5 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
     @Override
     public void clearContent() {
         this.heldItems.clear();
-    }
-
-    public static <T extends Mob> boolean checkSpawn(EntityType<T> type, ServerLevelAccessor world, MobSpawnType reason, BlockPos pos, Random rand) {
-        if (world.getBlockState(pos).is(Blocks.CAVE_AIR)) {  // && world.getBlockState(pos.below()).is(Blocks.STONE)
-            return true;
-        }
-
-        return false;
     }
 }

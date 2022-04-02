@@ -24,7 +24,7 @@ public class SingleMimicSpawner extends Block {
     public void tick(BlockState state, ServerLevel world, BlockPos pos, Random rand) {
         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
 
-        if (rand.nextInt(5) == 0){
+        if (rand.nextInt(1) == 0){
             MimicEntity e = (MimicEntity) Registry.ENTITY_TYPE.get(Constants.MIMIC_ENTITY_ID).create(world);
             e.setPos(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
             world.addFreshEntity(e);

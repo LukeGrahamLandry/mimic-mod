@@ -26,6 +26,7 @@ public class TamedFollowGoal extends Goal {
     private final float startDistance;
     private float oldWaterCost;
     private final boolean canFly;
+    private double teleportDistSq = 256;
 
     public TamedFollowGoal(MimicEntity self, double speed, float p_i225711_4_, float p_i225711_5_, boolean p_i225711_6_) {
         this.tamable = self;
@@ -84,7 +85,7 @@ public class TamedFollowGoal extends Goal {
         if (--this.timeToRecalcPath <= 0) {
             this.timeToRecalcPath = 10;
             if (!this.tamable.isLeashed() && !this.tamable.isPassenger()) {
-                if (this.tamable.distanceToSqr(this.owner) >= 144.0D) {
+                if (this.tamable.distanceToSqr(this.owner) >= this.teleportDistSq) {
                     this.teleportToOwner();
                 } else {
                     this.navigation.moveTo(this.owner, this.speedModifier);

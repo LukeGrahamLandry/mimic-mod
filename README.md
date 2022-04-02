@@ -28,3 +28,11 @@ A Minecraft mod that adds a stealthy new mob.
 - [Luke Graham Landry](https://github.com/LukeGrahamLandry) (Code)
 - [Redrix](https://www.curseforge.com/members/redrixttv/projects) (Assets)
 - [EpicNecromancer1](https://www.curseforge.com/members/epicnecromancer1) (Assets)
+
+## TODO
+- quark compat 
+  - switch to instanceof ChestBlock instead of directly checking
+  - change texture if instance of VariantChestBlock
+- no spoilers
+  - block Neat, ToroHealth, etc
+  - make HWYLA et al think its a chest block somehow

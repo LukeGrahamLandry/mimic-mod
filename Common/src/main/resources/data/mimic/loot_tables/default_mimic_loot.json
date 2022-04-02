@@ -6,6 +6,11 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "weight": 10,
+          "name": "mimic:mimic_key"
+        },
+        {
+          "type": "minecraft:item",
           "weight": 20,
           "name": "minecraft:golden_apple"
         },

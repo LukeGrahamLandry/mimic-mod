@@ -1,6 +1,6 @@
 package ca.lukegrahamlandry.mimic.client;
 
-import ca.lukegrahamlandry.mimic.MimicMain;
+import ca.lukegrahamlandry.mimic.Constants;
 import ca.lukegrahamlandry.mimic.entities.MimicEntity;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
@@ -8,20 +8,20 @@ import software.bernie.geckolib3.model.AnimatedGeoModel;
 public class MimicModel extends AnimatedGeoModel<MimicEntity> {
     @Override
     public ResourceLocation getModelLocation(MimicEntity mimic) {
-        return new ResourceLocation(Constants.MOD_ID, "geo/mimic.geo.json");
+        return Constants.MODEL_LOC;
     }
 
     @Override
     public ResourceLocation getTextureLocation(MimicEntity mimic) {
         if (mimic.isTamed()){
-            return new ResourceLocation(Constants.MOD_ID, "textures/entity/tamed_mimic.png");
+            return Constants.TAME_TEXTURE_LOC;
         } else {
-            return new ResourceLocation(Constants.MOD_ID, "textures/entity/evil_mimic.png");
+            return Constants.EVIL_TEXTURE_LOC;
         }
     }
 
     @Override
     public ResourceLocation getAnimationFileLocation(MimicEntity mimic) {
-        return new ResourceLocation(Constants.MOD_ID, "animations/mimic.animation.json");
+        return Constants.ANIM_LOC;
     }
 }

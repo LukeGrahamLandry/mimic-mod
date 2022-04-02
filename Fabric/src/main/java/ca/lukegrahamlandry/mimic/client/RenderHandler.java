@@ -1,6 +1,5 @@
 package ca.lukegrahamlandry.mimic.client;
 
-import ca.lukegrahamlandry.mimic.MimicMain;
 import ca.lukegrahamlandry.mimic.init.ContainerInit;
 import ca.lukegrahamlandry.mimic.init.EntityInit;
 import net.minecraft.client.gui.screens.MenuScreens;

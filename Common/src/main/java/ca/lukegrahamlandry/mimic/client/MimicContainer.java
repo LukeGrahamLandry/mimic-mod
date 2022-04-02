@@ -1,7 +1,9 @@
 package ca.lukegrahamlandry.mimic.client;
 
-import ca.lukegrahamlandry.mimic.init.ContainerInit;
+import ca.lukegrahamlandry.mimic.Constants;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,8 +19,8 @@ public class MimicContainer extends AbstractContainerMenu {
     private final Container container;
     private final int containerRows;
 
-    public static MimicContainer create(int p_216986_0_, Inventory p_216986_1_, FriendlyByteBuf extraData) {
-        return new MimicContainer(ContainerInit.EVIL_MIMIC.get(), p_216986_0_, p_216986_1_, 3);
+    public static MimicContainer create(ResourceLocation loc, int p_216986_0_, Inventory p_216986_1_, FriendlyByteBuf extraData) {
+        return new MimicContainer(Registry.MENU.get(loc), p_216986_0_, p_216986_1_, 3);
     }
 
     public MimicContainer(MenuType<?> p_i50091_1_, int p_i50091_2_, Inventory p_i50091_3_, int p_i50091_4_) {
