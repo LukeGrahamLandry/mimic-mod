@@ -1,6 +1,6 @@
 # Mimic Mod 
 
-A Minecraft mod for forge 1.16.5 that adds a stealthy new mob commissioned by Redrix
+A Minecraft mod that adds a stealthy new mob.
 
 ## Features 
 - mimic monster that looks exactly like a chest
@@ -22,12 +22,9 @@ A Minecraft mod for forge 1.16.5 that adds a stealthy new mob commissioned by Re
 - shift right click a chest with a Fake Chest to summon a mimic
 
 ## Dependencies 
-- [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib/files/3261545)
-
-## Support the Developer 
-- https://patreon.com/LukeGrahamLandry
-- DM LukeGrahamLandry#6888 on discord for mod commissions 
+- [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib)
 
 ## Credits 
 - [Luke Graham Landry](https://github.com/LukeGrahamLandry) (Code)
-- [Redrix](https://www.curseforge.com/members/redrixttv/projects) (Assets, Ideas & Funding)
+- [Redrix](https://www.curseforge.com/members/redrixttv/projects) (Assets)
+- [EpicNecromancer1](https://www.curseforge.com/members/epicnecromancer1) (Assets)

@@ -1,0 +1,36 @@
+{
+    "schemaVersion": 1,
+    "id": "mimic",
+    "version": "${version}",
+  
+    "name": "Mimic",
+    "description": "This is an example description! Tell everyone what your mod is about!",
+    "authors": [
+      "LukeGrahamLandry#6888"
+    ],
+    "contact": {
+      "homepage": "https://moddingtutorials.org/commissions",
+      "sources": "https://github.com/LukeGrahamLandryMC/mimic-mod"
+    },
+  
+    "license": "MIT",
+    "icon": "assets/modid/icon.png",
+  
+    "environment": "*",
+    "entrypoints": {
+      "main": [
+        "ca.lukegrahamlandry.mimic.ExampleMod"
+      ]
+    },
+    "mixins": [
+      "mimic.mixins.json"
+    ],
+  
+    "depends": {
+      "fabricloader": ">=0.13",
+      "fabric": "*",
+      "minecraft": "1.18.x",
+      "java": ">=17"
+    }
+  }
+  
