@@ -7,6 +7,7 @@ public class ExampleMod implements ModInitializer {
     
     @Override
     public void onInitialize() {
-        GeckoLib.initialize();
+
+        // GeckoLib.initialize();
     }
 }

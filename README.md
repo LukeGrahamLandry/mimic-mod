@@ -1,8 +1,11 @@
 # Mimic Mod 
 
-A Minecraft mod that adds a stealthy new mob.
+A Minecraft mod that adds a stealthy new mob.  
+
+Using multiloader so it could build for fabric but geckolib-fabric doesnt support the official mappings so i gave up.  
 
 ## Features 
+
 - mimic monster that looks exactly like a chest
     - will wonder around looking for a chest to eat
     - if it cant find one after a while it will just sit down and wait
@@ -19,7 +22,7 @@ A Minecraft mod that adds a stealthy new mob.
     - then it will follow you and can be used as storage
     - shift right click it to make it sit and stealth
     - can only be opened while sitting
-- shift right click a chest with a Fake Chest to summon a mimic
+- shift right click a chest with a Mimic Heart to summon a mimic
 
 ## Dependencies 
 - [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib)
@@ -36,3 +39,8 @@ A Minecraft mod that adds a stealthy new mob.
 - no spoilers
   - block Neat, ToroHealth, etc
   - make HWYLA et al think its a chest block somehow
+- other mimics
+  - ender chest
+  - cake
+- spawn in more structures including modded ones
+  - repurposed structures

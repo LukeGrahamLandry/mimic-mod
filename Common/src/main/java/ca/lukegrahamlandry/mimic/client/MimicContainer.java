@@ -12,8 +12,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class MimicContainer extends AbstractContainerMenu {
     private final Container container;
@@ -89,7 +87,6 @@ public class MimicContainer extends AbstractContainerMenu {
         return this.container;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public int getRowCount() {
         return this.containerRows;
     }

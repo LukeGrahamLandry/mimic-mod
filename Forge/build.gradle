@@ -1,10 +1,12 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
 apply plugin: 'java'
@@ -31,6 +33,8 @@ minecraft {
             taskName 'Client'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            arg "-mixin.config=mimic.mixins.json"
             mods {
                 modClientRun {
                     source sourceSets.main
@@ -45,6 +49,7 @@ minecraft {
             taskName 'Server'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            arg "-mixin.config=mimic.mixins.json"
             mods {
                 modServerRun {
                     source sourceSets.main
@@ -78,8 +83,10 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
     compileOnly project(":Common")
-    implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.12')
+    implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.10')
 }
 
 tasks.withType(JavaCompile) {
@@ -88,6 +95,21 @@ tasks.withType(JavaCompile) {
 
 processResources {
     from project(":Common").sourceSets.main.resources
+}
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : "mimic",
+                "Specification-Vendor"    : ":",
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "luke",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "mimic.mixins.json"
+        ])
+    }
 }
 
 
@@ -107,6 +129,12 @@ publishing {
             url "file://" + System.getenv("local_maven")
         }
     }
+}
+
+apply plugin: 'org.spongepowered.mixin'
+
+mixin {
+    add sourceSets.main, "mimic.refmap.json"
 }
 
 apply from: "https://moddingtutorials.org/applesilicon.gradle"
