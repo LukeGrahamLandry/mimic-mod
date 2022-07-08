@@ -16,7 +16,6 @@ import java.util.Random;
 // so instead i place a block and schedule a tick to turn it into a mob
 
 public class SingleMimicSpawner extends Block {
-    static Random rand = new Random();
     public SingleMimicSpawner(Block.Properties properties) {
         super(properties);
     }

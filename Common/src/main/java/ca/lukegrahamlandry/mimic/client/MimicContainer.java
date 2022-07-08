@@ -18,6 +18,10 @@ public class MimicContainer extends AbstractContainerMenu {
     private final int containerRows;
 
     public static MimicContainer create(ResourceLocation loc, int p_216986_0_, Inventory p_216986_1_, FriendlyByteBuf extraData) {
+        return create(loc, p_216986_0_, p_216986_1_);
+    }
+
+    public static MimicContainer create(ResourceLocation loc, int p_216986_0_, Inventory p_216986_1_) {
         return new MimicContainer(Registry.MENU.get(loc), p_216986_0_, p_216986_1_, 3);
     }
 

@@ -17,7 +17,6 @@ public class RenderHandler {
         EntityRenderers.register(EntityInit.MIMIC.get(), MimicRenderer::new);
 
         MenuScreens.register(ContainerInit.EVIL_MIMIC.get(), CustomChestScreen::createEvil);
-
         MenuScreens.register(ContainerInit.TAME_MIMIC.get(), CustomChestScreen::createTame);
     }
 }
