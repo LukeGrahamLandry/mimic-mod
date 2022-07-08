@@ -8,12 +8,12 @@ import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class MimicModel extends AnimatedGeoModel<ForgeGeoMimicEntity> {
     @Override
-    public ResourceLocation getModelLocation(ForgeGeoMimicEntity mimic) {
+    public ResourceLocation getModelResource(ForgeGeoMimicEntity mimic) {
         return Constants.MODEL_LOC;
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ForgeGeoMimicEntity mimic) {
+    public ResourceLocation getTextureResource(ForgeGeoMimicEntity mimic) {
         if (mimic.isTamed()){
             return Constants.TAME_TEXTURE_LOC;
         } else {
@@ -22,7 +22,7 @@ public class MimicModel extends AnimatedGeoModel<ForgeGeoMimicEntity> {
     }
 
     @Override
-    public ResourceLocation getAnimationFileLocation(ForgeGeoMimicEntity mimic) {
+    public ResourceLocation getAnimationResource(ForgeGeoMimicEntity mimic) {
         return Constants.ANIM_LOC;
     }
 }

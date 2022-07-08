@@ -5,6 +5,7 @@ import ca.lukegrahamlandry.mimic.entities.MimicEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,7 +22,7 @@ public class SingleMimicSpawner extends Block {
     }
 
     @Override
-    public void tick(BlockState state, ServerLevel world, BlockPos pos, Random rand) {
+    public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource rand) {
         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
 
         if (rand.nextInt(1) == 0){

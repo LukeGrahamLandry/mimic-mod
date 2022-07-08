@@ -11,6 +11,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -265,6 +266,10 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
             if (this.isEmpty()) this.generateDefaultLoot();
             player.openMenu(this);
             return InteractionResult.SUCCESS;
+        }
+
+        if (!this.isStealth() && !player.isShiftKeyDown() && this.isTamed()){
+            player.displayClientMessage(Component.translatable("mimic.no_open_standing"), true);
         }
 
         return InteractionResult.PASS;

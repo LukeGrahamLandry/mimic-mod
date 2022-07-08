@@ -2,7 +2,7 @@
 
 A Minecraft mod that adds a stealthy new mob.  
 
-Using multiloader so it could build for fabric but geckolib-fabric doesnt support the official mappings so i gave up.  
+Using multiloader so it could build for fabric but in 1.18 geckolib-fabric doesnt support the official mappings so i gave up. Now it does but I havent gotten around to dealing with it yet. 
 
 ## Features 
 

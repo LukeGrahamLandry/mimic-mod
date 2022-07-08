@@ -4,5 +4,7 @@
   "item.mimic.mimic_spawn_egg": "Mimic Spawn Egg",
   "item.mimic.fake_chest": "Mimic Heart",
 
-  "entity.mimic.mimic": "Mimic"
+  "entity.mimic.mimic": "Mimic",
+
+  "mimic.no_open_standing": "Only sitting mimics may be opened."
 }
