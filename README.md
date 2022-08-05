@@ -42,3 +42,4 @@ A Minecraft mod that adds a stealthy new mob.
   - cake
 - spawn in more structures including modded ones
   - repurposed structures
+- dont trigger pressure plates so desert temples work properly

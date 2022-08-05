@@ -1,0 +1,19 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "ca.lukegrahamlandry.mimic.mixin",
+    "compatibilityLevel": "JAVA_16",
+    "mixins": [
+      "MixinDungeonsFeature",
+      "MixinEndCityPieces",
+      "MixinIglooPieces",
+      "MixinStructurePiece"
+    ],
+    "client": [
+
+    ],
+    "injectors": {
+      "defaultRequire": 1
+    }
+  }
+  

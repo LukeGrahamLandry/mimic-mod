@@ -12,7 +12,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 public class EntityInit {
-    public static DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES, Constants.MOD_ID);
+    public static DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Constants.MOD_ID);
 
     public static final RegistryObject<EntityType<ForgeGeoMimicEntity>> MIMIC = ENTITY_TYPES.register(Constants.MIMIC_ENTITY_ID.getPath(),
             () -> EntityType.Builder.of(ForgeGeoMimicEntity::new, MobCategory.MISC).sized(1f, 1f)
