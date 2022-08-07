@@ -1,0 +1,10 @@
+{
+  "item.mimic.mimic_key": "Chìa khóa Mimic",
+  "item.mimic.mimic_lock": "Ổ khóa Mimic",
+  "item.mimic.mimic_spawn_egg": "Trứng sinh ra Mimic",
+  "item.mimic.fake_chest": "Trái tim Mimic",
+
+  "entity.mimic.mimic": "Mimic",
+
+  "mimic.no_open_standing": "Chỉ có thể mở được những con mimic đang ngồi."
+}
