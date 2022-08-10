@@ -32,6 +32,7 @@ public class MimicMain {
         ContainerInit.CONTAINER_TYPES.register(modEventBus);
         BlockInit.BLOCKS.register(modEventBus);
 
+        MimicConfig.loadConfig();
         modEventBus.addListener(MimicMain::mobAttributes);
     }
 
