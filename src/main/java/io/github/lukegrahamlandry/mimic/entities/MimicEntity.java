@@ -7,6 +7,7 @@ import io.github.lukegrahamlandry.mimic.init.ContainerInit;
 import io.github.lukegrahamlandry.mimic.init.ItemInit;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ChestBlock;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -32,6 +33,9 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.pathfinding.Path;
+import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.tileentity.LockableLootTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -620,5 +624,28 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
         }
 
         return false;
+    }
+
+    public void consumeChest(BlockPos pos) {
+        TileEntity tile = this.level.getBlockEntity(pos);
+        if (!(tile instanceof LockableLootTileEntity)) {
+            System.out.println("mimic failed to eat chest at " + pos + " was " + this.level.getBlockState(pos).getBlock().getRegistryName());
+            return;
+        }
+
+        LockableLootTileEntity chest = (LockableLootTileEntity) tile;
+
+        // take items
+        for (int i=0;i<chest.getContainerSize();i++){
+            this.addItem(chest.getItem(i));
+            chest.setItem(i, ItemStack.EMPTY);
+        }
+        // this.owner.addItem(new ItemStack(Items.CHEST));
+
+        Direction chestFacing = this.level.getBlockState(pos).getOptionalValue(ChestBlock.FACING).orElse(Direction.NORTH);
+        if (chestFacing.getAxis() == Direction.Axis.Y) chestFacing = Direction.NORTH;
+        this.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        this.snapToBlock(pos, chestFacing);
+        this.setStealth(true);
     }
 }
