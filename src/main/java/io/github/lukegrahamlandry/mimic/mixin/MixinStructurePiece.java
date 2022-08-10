@@ -31,8 +31,6 @@ import java.util.Random;
 public abstract class MixinStructurePiece {
     @Inject(at = @At("RETURN"), method = "createChest(Lnet/minecraft/world/IServerWorld;Lnet/minecraft/util/math/MutableBoundingBox;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/BlockState;)Z")
     private void createChest(IServerWorld world, MutableBoundingBox p_191080_2_, Random rand, BlockPos pos, ResourceLocation loottable, @Nullable BlockState state, CallbackInfoReturnable<Boolean> callback) {
-        MimicMain.LOGGER.debug("!! createChest mixin !!");
-
         BlockState topState = world.getBlockState(pos.above());
         if (topState.getBlock() == Blocks.STRUCTURE_BLOCK || topState.getBlock() == Blocks.VINE || topState.isAir()){
             world.setBlock(pos.above(), BlockInit.SINGLE_MIMIC_SPAWN.get().defaultBlockState(), 3);

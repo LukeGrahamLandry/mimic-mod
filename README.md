@@ -20,6 +20,7 @@ A Minecraft mod for forge 1.16.5 that adds a stealthy new mob commissioned by Re
     - shift right click it to make it sit and stealth
     - can only be opened while sitting
 - shift right click a chest with a Fake Chest to summon a mimic
+- the chance of a mimic spawning from a chest in a supported structure is configurable at `world/serverconfig/mimic-server.toml` (default 20%)
 
 ## Dependencies 
 - [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib/files/3261545)

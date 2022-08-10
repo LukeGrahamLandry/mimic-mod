@@ -1,5 +1,6 @@
 package io.github.lukegrahamlandry.mimic.events;
 
+import io.github.lukegrahamlandry.mimic.MimicConfig;
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.entities.MimicEntity;
 import io.github.lukegrahamlandry.mimic.init.EntityInit;
@@ -29,14 +30,13 @@ public class TickHandler {
     public static List<MimicSpawnData> spawns = new ArrayList<>();
 
     @SubscribeEvent
-    public static void loadBiome(TickEvent.ServerTickEvent event) {
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.START){
             for (MimicSpawnData spawn : spawns){
                 spawn.time--;
                 if (spawn.time <= 0){
                     spawnMimic(spawn);
                     spawns.remove(spawn);
-                    MimicMain.LOGGER.debug(spawns);
                     return;
                 }
             }
@@ -44,7 +44,7 @@ public class TickHandler {
     }
 
     private static void spawnMimic(MimicSpawnData spawn) {
-        MimicMain.LOGGER.debug("try spawn mimic");
+        if (MimicConfig.debugMode.get()) MimicMain.LOGGER.debug("try summon mimic at " + spawn.pos);
 
         BlockState state = spawn.world.getBlockState(spawn.pos);
         if (state.is(Blocks.CHEST)){

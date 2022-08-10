@@ -43,8 +43,6 @@ public class EatChestGoal extends Goal {
         BlockState state = this.owner.level.getBlockState(pos);
         this.owner.snapToBlock(pos.above(), state.getValue(ChestBlock.FACING));
         this.owner.startAttackAnim();
-
-        MimicMain.LOGGER.debug("start eat chest");
     }
 
     @Override

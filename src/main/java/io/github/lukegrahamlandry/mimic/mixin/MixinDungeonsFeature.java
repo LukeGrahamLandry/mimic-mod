@@ -1,5 +1,6 @@
 package io.github.lukegrahamlandry.mimic.mixin;
 
+import io.github.lukegrahamlandry.mimic.MimicConfig;
 import io.github.lukegrahamlandry.mimic.MimicMain;
 import io.github.lukegrahamlandry.mimic.init.BlockInit;
 import net.minecraft.block.BlockState;
@@ -72,7 +73,6 @@ public class MixinDungeonsFeature {
                         BlockPos blockpos1 = p_241855_4_.offset(k3, i4, k4);
                         BlockState blockstate = p_241855_1_.getBlockState(blockpos1);
                         if (blockstate.is(Blocks.CHEST)){
-                            MimicMain.LOGGER.debug("A: found dungeon chest at " + blockpos1);
                             p_241855_1_.setBlock(blockpos1.above(), BlockInit.SINGLE_MIMIC_SPAWN.get().defaultBlockState(), 3);
                             p_241855_1_.getBlockTicks().scheduleTick(blockpos1.above(), BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
                         }
@@ -97,7 +97,6 @@ public class MixinDungeonsFeature {
                     }
 
                     if (j3 == 1 && p_241855_1_.getBlockState(blockpos2).is(Blocks.CHEST)) {
-                        MimicMain.LOGGER.debug("B: found dungeon chest at " + blockpos2);
                         p_241855_1_.setBlock(blockpos2.above(), BlockInit.SINGLE_MIMIC_SPAWN.get().defaultBlockState(), 3);
                         p_241855_1_.getBlockTicks().scheduleTick(blockpos2.above(), BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
                         break;

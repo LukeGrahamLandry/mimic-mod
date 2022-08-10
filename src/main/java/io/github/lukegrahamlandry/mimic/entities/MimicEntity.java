@@ -128,7 +128,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             if (!this.isAngry() && !this.isStealth() && !this.isTamed() && getRandom().nextInt(boredOfWanderingChance) == 0){
                 this.snapToBlock(this.blockPosition(), Direction.from2DDataValue(Math.floorDiv((int) this.yBodyRot, 90)));
                 this.setStealth(true);
-                MimicMain.LOGGER.debug("mimic got board of searching and sat down");
             }
 
             // stealth if a player is near
@@ -146,7 +145,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
     public void snapToBlock(BlockPos pos, @Nullable Direction dir){
         if (dir == null) dir = Direction.from2DDataValue(getRandom().nextInt(4));
-        MimicMain.LOGGER.debug("snaped facing " + dir.getName());
         this.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, dir.get2DDataValue() * 90, 0);
         this.setYBodyRot(dir.get2DDataValue() * 90);
         this.getNavigation().moveTo((Path) null, 0);
@@ -479,7 +477,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
             this.getEntityData().set(UP_DOWN_TICK, 22);
         }
         this.getEntityData().set(IS_STEALTH, flag);
-        MimicMain.LOGGER.debug("stealth: " + flag);
     }
 
     public void setLocked(boolean flag) {
@@ -569,7 +566,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
 
     private void onTake(){
         this.playerLookTicks = 2;
-        MimicMain.LOGGER.debug("take item");
         if (this.isLocked() && getRandom().nextInt(3) == 0){
             this.playerLooking.closeContainer();
             this.scaredTicks = 400;
@@ -615,15 +611,6 @@ public class MimicEntity extends CreatureEntity implements IAnimatable, INamedCo
     @Override
     public void clearContent() {
         this.heldItems.clear();
-    }
-
-    public static <T extends MobEntity> boolean checkSpawn(EntityType<T> type, IServerWorld world, SpawnReason reason, BlockPos pos, Random rand) {
-        if (world.getBlockState(pos).is(Blocks.CAVE_AIR)) {  // && world.getBlockState(pos.below()).is(Blocks.STONE)
-            MimicMain.LOGGER.debug("spawn mimic at " + pos);
-            return true;
-        }
-
-        return false;
     }
 
     public void consumeChest(BlockPos pos) {

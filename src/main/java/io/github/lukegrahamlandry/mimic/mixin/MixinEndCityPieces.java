@@ -24,8 +24,6 @@ import java.util.Random;
 public class MixinEndCityPieces {
     @Inject(at = @At("RETURN"), method = "handleDataMarker(Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/IServerWorld;Ljava/util/Random;Lnet/minecraft/util/math/MutableBoundingBox;)V")
     private void handleDataMarker(String tag, BlockPos pos, IServerWorld world, Random rand, MutableBoundingBox p_186175_5_, CallbackInfo ci) {
-        MimicMain.LOGGER.debug("!! endcity mixin !!");
-
         if (tag.startsWith("Chest")){
             world.setBlock(pos, BlockInit.SINGLE_MIMIC_SPAWN.get().defaultBlockState(), 3);
             world.getBlockTicks().scheduleTick(pos, BlockInit.SINGLE_MIMIC_SPAWN.get(), 1);
