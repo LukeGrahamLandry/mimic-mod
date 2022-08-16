@@ -23,6 +23,8 @@ public class MimicMain {
         BlockInit.BLOCKS.register(modEventBus);
 
         modEventBus.addListener(MimicMain::mobAttributes);
+
+        MimicForgeConfig.loadConfig();
     }
 
     public static void mobAttributes(EntityAttributeCreationEvent event){

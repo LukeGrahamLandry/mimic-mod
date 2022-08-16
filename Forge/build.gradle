@@ -79,6 +79,10 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 
 repositories {
     maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+
+    maven {
+        url "https://cursemaven.com";
+    }
 }
 
 dependencies {
@@ -86,7 +90,11 @@ dependencies {
 
     annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
     compileOnly project(":Common")
-    implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.10')
+    implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.18:3.0.34')
+
+
+    compileOnly fg.deobf('curse.maven:torohealth-245733:3556931')
+    // runtimeOnly fg.deobf('curse.maven:torohealth-245733:3556931')
 }
 
 tasks.withType(JavaCompile) {

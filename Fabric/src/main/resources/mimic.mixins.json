@@ -3,7 +3,6 @@
     "minVersion": "0.8",
     "package": "ca.lukegrahamlandry.mimic.mixin",
     "compatibilityLevel": "JAVA_16",
-    "refmap": "mimic.refmap.json",
     "mixins": [
       "MixinDungeonsFeature",
       "MixinEndCityPieces",
