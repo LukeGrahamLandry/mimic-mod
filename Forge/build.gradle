@@ -94,7 +94,7 @@ dependencies {
 
 
     compileOnly fg.deobf('curse.maven:torohealth-245733:3556931')
-    // runtimeOnly fg.deobf('curse.maven:torohealth-245733:3556931')
+    runtimeOnly fg.deobf('curse.maven:torohealth-245733:3556931')
 }
 
 tasks.withType(JavaCompile) {

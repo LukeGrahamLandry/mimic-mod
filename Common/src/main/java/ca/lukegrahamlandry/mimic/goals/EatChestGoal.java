@@ -45,18 +45,7 @@ public class EatChestGoal extends Goal {
         BlockState state = this.owner.level.getBlockState(pos);
         // take items from the chest and break it
         if (this.owner.getAttackTick() == 3 && state.is(Blocks.CHEST)){
-            ChestBlockEntity chest = (ChestBlockEntity) this.owner.level.getBlockEntity(pos);
-
-            // take items
-            for (int i=0;i<chest.getContainerSize();i++){
-                this.owner.addItem(chest.getItem(i));
-                chest.setItem(i, ItemStack.EMPTY);
-            }
-            // this.owner.addItem(new ItemStack(Items.CHEST));
-
-            this.owner.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-            this.owner.snapToBlock(pos, state.getValue(ChestBlock.FACING));
-            this.owner.setStealth(true);
+            this.owner.consumeChest(pos);
         }
     }
 }

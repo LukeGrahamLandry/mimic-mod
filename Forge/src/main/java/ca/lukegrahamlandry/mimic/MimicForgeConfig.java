@@ -19,17 +19,12 @@ public class MimicForgeConfig {
     private static final ForgeConfigSpec server_config;
 
     public static ForgeConfigSpec.IntValue mimicSpawnChance;
-    public static ForgeConfigSpec.BooleanValue debugMode;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> healthBarBlacklist;
 
     static {
-        // TODO
-//        mimicSpawnChance = server_builder
-//                .comment("When a chest is generated in a supported structure it will have a 1/x chance of being a mimic. Higher value means fewer mimics. A value of 1 means always a mimic.")
-//                .defineInRange("mimicSpawnChance", 5, 1, Integer.MAX_VALUE);
-//        debugMode = server_builder
-//                .comment("When true, the location of mimic spawns will be logged.")
-//                .define("debugMode", false);
+        mimicSpawnChance = server_builder
+                .comment("When a chest is generated in a supported structure it will have a 1/x chance of being a mimic. Higher value means fewer mimics. A value of 1 means always a mimic.")
+                .defineInRange("mimicSpawnChance", 5, 1, Integer.MAX_VALUE);
 
         healthBarBlacklist = server_builder
                 .comment("S: registry names of entities that should not have a displayed ToroHealth bar (ex. [\"minecraft:wither\", \"minecraft:villager\"]).", "Mimics are hard coded and will included while stealthed regardless of the list", "Since this is in the server config, all clients will be effected. Nothing will happen if ToroHealth is not installed")

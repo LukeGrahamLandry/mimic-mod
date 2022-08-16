@@ -21,4 +21,9 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
+
+    @Override
+    public int mimicSpawnChance() {
+        return 5; // TODO: config
+    }
 }
