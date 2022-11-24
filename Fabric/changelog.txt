@@ -1,0 +1,1 @@
+- make the mimic eating the chest it spawned on more reliable so you dont end up duplicating items

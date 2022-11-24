@@ -21,6 +21,7 @@ A Minecraft mod that adds a stealthy new mob.
     - shift right click it to make it sit and stealth
     - can only be opened while sitting
 - shift right click a chest with a Mimic Heart to summon a mimic
+- mimic will not show ToroHealth bar when stealthed
 
 ## Dependencies 
 - [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib)

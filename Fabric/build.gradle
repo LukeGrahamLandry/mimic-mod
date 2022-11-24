@@ -73,3 +73,5 @@ publishing {
         }
     }
 }
+
+apply from: "../../mc-utils/publish.gradle"

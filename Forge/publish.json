@@ -1,0 +1,25 @@
+{
+  "loader": "forge",
+  "mc_versions": ["1.19.2", "1.19.1", "1.19"],
+  "releaseType": "release",
+  "curseforge": {
+    "id": "475842",
+    "requiredDependencies": [
+      "geckolib"
+    ]
+  },
+  "modrinth": {
+    "id": "ePo6jqBP",
+    "requiredDependencies": [
+      "geckolib"
+    ]
+  },
+  "github": {
+    "owner": "LukeGrahamLandry",
+    "repo": "mimic-mod",
+    "branch": "1.19",
+    "requiredDependencies": {
+      "Geckolib": "https://modrinth.com/mod/geckolib"
+    }
+  }
+}

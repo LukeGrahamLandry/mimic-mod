@@ -36,6 +36,11 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -596,5 +601,29 @@ public class MimicEntity extends PathfinderMob implements MenuProvider, Containe
     @Override
     public void clearContent() {
         this.heldItems.clear();
+    }
+
+
+    public void consumeChest(BlockPos pos) {
+        BlockEntity tile = this.level.getBlockEntity(pos);
+        if (!(tile instanceof BaseContainerBlockEntity)) {
+            System.out.println("mimic failed to eat chest at " + pos);
+            return;
+        }
+
+        BaseContainerBlockEntity chest = (BaseContainerBlockEntity) tile;
+
+        // take items
+        for (int i=0;i<chest.getContainerSize();i++){
+            this.addItem(chest.getItem(i));
+            chest.setItem(i, ItemStack.EMPTY);
+        }
+        // this.owner.addItem(new ItemStack(Items.CHEST));
+
+        Direction chestFacing = this.level.getBlockState(pos).getOptionalValue(ChestBlock.FACING).orElse(Direction.NORTH);
+        if (chestFacing.getAxis() == Direction.Axis.Y) chestFacing = Direction.NORTH;
+        this.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        this.snapToBlock(pos, chestFacing);
+        this.setStealth(true);
     }
 }

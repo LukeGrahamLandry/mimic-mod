@@ -2,6 +2,7 @@ package ca.lukegrahamlandry.mimic.blocks;
 
 import ca.lukegrahamlandry.mimic.Constants;
 import ca.lukegrahamlandry.mimic.entities.MimicEntity;
+import ca.lukegrahamlandry.mimic.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
@@ -24,10 +25,11 @@ public class SingleMimicSpawner extends Block {
     public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource rand) {
         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
 
-        if (rand.nextInt(1) == 0){
+        if (rand.nextInt(Services.PLATFORM.mimicSpawnChance()) == 0){
             MimicEntity e = (MimicEntity) Registry.ENTITY_TYPE.get(Constants.MIMIC_ENTITY_ID).create(world);
             e.setPos(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
             world.addFreshEntity(e);
+            e.consumeChest(pos.below());
         }
     }
 
